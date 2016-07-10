@@ -37,7 +37,7 @@
 #include "common.h"
 extern status error (char *layout,...);
 #else /* sim1750 */
-#include "type.h"
+#include "types.h"
 #include "status.h"
 #endif
 

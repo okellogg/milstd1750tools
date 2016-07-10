@@ -28,7 +28,7 @@
 /*                                                                         */
 /***************************************************************************/
 
-#include "type.h"
+#include "types.h"
 #include "syms.h"
 
 /* Sourcetext related defs: */

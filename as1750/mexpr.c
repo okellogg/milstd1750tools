@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include "type.h"
+#include "types.h"
 #include "utils.h"
 #include "macsym.h"
 

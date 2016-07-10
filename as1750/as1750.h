@@ -1,4 +1,6 @@
 /* as1750.h  --  exports of as1750.c */
+ 
+#include "types.h"
 
 extern void init_as1750 ();
 extern unsigned short as1750 (char *operation,

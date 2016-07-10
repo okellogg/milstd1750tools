@@ -417,7 +417,7 @@ do_output (int obj_index, ulong address)
 			       objblk[curr_frag].line[obj_index]->linenum))
 		    {
 		      fprintf (stderr,
-		  "ByteRel displacemt out of range; addr = #%04lX, dspl = %d\n",
+			  "ByteRel displacemt out of range; addr = #%04X, dspl = %d\n",
 			   address, dspl);
 		      exit (EXIT_FAILURE);
 		    }
@@ -458,7 +458,7 @@ do_output (int obj_index, ulong address)
 	  printf ("\n\t\tSECTION: %s\n", objblk[curr_sect].name);
 	}
       if ((lp = objblk[curr_frag].line[obj_index]) == LNULL)
-	printf ("%07lX:  %04hX  Strange, (lp == LNULL)\n",
+	printf ("%07X:  %04hX  Strange, (lp == LNULL)\n",
 		address, word);
       else if (n_words_seen == 0)
 	{
@@ -1835,7 +1835,7 @@ main (int argc, char *argv[])
 	      sscanf (nextarg, "%lx", &static_startaddr);
 	      break;
 	    case 't':
-	      sscanf (nextarg, "%lx", &transfer_address);
+	      sscanf (nextarg, "%x", &transfer_address);
 	      break;
 	    case 'u':
 	      unix_compatible = TRUE;

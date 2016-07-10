@@ -43,7 +43,7 @@
 #include "as1750.h"
 #define bool      char
 #define ushort    unsigned short
-#define ulong     unsigned long
+#define ulong     unsigned int
 #define status    unsigned
 #define dtoi(ascii_char) (ascii_char - '0')
 #endif

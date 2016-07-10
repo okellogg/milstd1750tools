@@ -1,1 +1,1 @@
-#define AS1750_VERSION "1.2a"
+#define AS1750_VERSION "1.3 (prerelease)"

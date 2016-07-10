@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
-#include "type.h"
+#include "types.h"
 #include "utils.h"
 
 
@@ -42,8 +42,8 @@
 #else
 #define RAMSIZ 0x20000
 #endif
-static unsigned long ram[RAMSIZ];
-static long ram_index = 0;
+static unsigned int ram[RAMSIZ];
+static int ram_index = 0;
 extern bool debug_alloc;	/* from main.c */
 #endif
 
@@ -52,7 +52,7 @@ myalloc (int siz)
 {
 #ifdef MYALLOC
   int allocsiz = (siz + 3) / 4;
-  unsigned long *allocstart = ram + ram_index;
+  unsigned int *allocstart = ram + ram_index;
 
   if (ram_index + allocsiz >= RAMSIZ)
     {
@@ -301,7 +301,7 @@ skip_symbol (char *s)
 }
 
 
-long
+int
 get_nibbles (char *src, int n_nibbles)
   /* Convert n-digit (1 <= n <= 8) hex string to number. */
   /* Returns -1L on error, else a number in the range 0 .. 0x7FFFFFFF. */
@@ -309,13 +309,13 @@ get_nibbles (char *src, int n_nibbles)
      (sign bit) can not be used, so the maximum readable bitwidth is 31. */
 {
   int i;
-  long outnum = 0;
+  int outnum = 0;
 
   while (n_nibbles-- > 0)
     {
       if ((i = xtoi (*src++)) == -1)
 	return -1L;
-      outnum = (outnum << 4) | (long) i;
+      outnum = (outnum << 4) | i;
     }
   return outnum;
 }

@@ -30,7 +30,7 @@
 
 
 #include <stdio.h>
-#include "type.h"
+#include "types.h"
 #include "utils.h"
 #include "tldldm.h"
 
