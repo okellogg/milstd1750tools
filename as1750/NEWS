@@ -1,0 +1,306 @@
+Changes in V. 1.2b:
+
+* Documented the '-u' command line switch in the manpage.
+  This switch was introduced in as1750-1.2a.
+
+* Added curly braces around multilevel 'if - else if' chain in utils.c
+  function findc() to appease gcc-4.5.3 warning about ambiguous 'else'
+
+* In main.c function assemble_line(), at the non_opcode handling of
+  macro instructions, removed the setting of seen_symdef to FALSE.
+  (Reason: macro instructions shall not shadow symbol definitions.)
+
+assemble_line (int curr_macro, char **macparm, int n_macparms)
+* Copied the file ms1750.inc from the config/1750a directory of gcc-2.95
+  into the 'tests' subdir so that tests can be built standalone.
+
+
+Changes in V. 1.2a:
+
+* Due to simple oversights in main.c, the Init section and the call-envelope
+  feature were broken in v. 1.2, apologies for that.
+
+* Added support for GAS syntax (see decription of the GNU Assembler):
+  .globl, .comm, .text, .rodata, .bss, .word, .long, .float, .double
+  are recognized. The intention is that as1750 will also assemble
+  outputs from the GCC m1750 configuration developed by C. Nettleton
+  (see http://www.ccfn.co.uk/)
+
+* Corrected the FLOATING_TWO_TO_THE_THIRTYNINE value in flt1750.c
+  (thanks to C. Nettleton, nettleto@ccfn.demon.co.uk)
+
+* New command line switch `-u' enables Unix assembler compatibility as
+  follows: When not Unix compatible (i.e. as1750 native mode), references
+  to external global symbols must be explicitly declared by a GLOBAL or
+  IMPORT statement.  The `-u' flag removes this restriction, i.e. symbols
+  that could not be resolved local to each file are assumed to be
+  references to external globals.
+
+* In the post-relocation listing (-ar), lines containing only label
+  definitions were absent; added these.
+
+* The COPYING file was missing in v. 1.2, added it back in.
+
+
+V. 1.2 changes w.r.t. 1.1:
+
+* Integrated as1750 with Alfred Arnold's AS
+  (ftp://ftp.kfa-juelich.de/pub/msdos/assemblers/as/c_version/asport.tar.gz)
+  Renamed file as.c to as1750.c and files fltcnv.[ch] to flt1750.[ch]
+  along the way.
+
+* The program now returns exit codes as it should.
+
+* Repaired the ORG statement, which previously only worked if it appeared
+  after all relocatable code in the assembly source file.
+
+* Address processing converted to 32 bits, which means that 20 bit
+  addresses in ORGs now work.
+
+* Enhanced the functionality of ORG: if an ORG directive is preceded
+  by a label, then assembly into that ORG fragment may later be
+  resumed via the new RESUME <label> directive (see manpage)
+
+* Added a code overlap check after linking that warns for every overlap
+  that occurred among any of the INIT/NORMAL/KONST/STATIC or ORG fragments.
+
+* For command line switches that take an argument, the argument may
+  now be given as a separate argument, i.e. with whitespace between
+  the switch letter and the argument. For example,
+	  as1750 test.s -otest.hex
+  may now also be written as
+	  as1750 test.s -o test.hex
+
+* Added support for TLD Logical-addressing Load Module (LLM) file format.
+  Use the file extension .llm in the "-o" command line directive. This
+  is not yet well tested, so please report your experiences.
+
+* Added a TLD Linker specific statement, ASSIGN, that generates commands in
+  the load module to set the MMU page registers. Syntax is the same as for
+  the TLD Linker statement, only that arguments are separated by commas.
+  Example:   ASSIGN  0.2o, 1B, 3
+  assigns the values 0x1B, 0x1C, and 0x1D to operand page registers 2, 3,
+  and 4 respectively, of Address State 0. 
+  When generating the LLM format, the ASSIGN statements are used for
+  creating Logical Allocation records.
+
+* Again compiled as1750 under 16-bit DOS with Borland C/C++ 3.0 using the
+  Large memory model. Define symbols STRNCASECMP and STRDUP at the
+  compiler options.
+  Also, again compiled it under OpenVMS/VAX with DEC C (see vmsbuild.com)
+
+* Applied the standard GNU style of indentation to all .c files.
+
+
+V. 1.1 changes w.r.t. 1.0:
+
+* Repaired the EQU statement, cleaned up memory allocation for the input line
+  argument vector.
+
+* Compiled the assembler under DOS with a 16-bit compiler. In that environment,
+  only fairly small programs can be assembled. Also, on some PC C compilers
+  the frexp() and pow() math library functions used by fltcnv.c seem not to
+  work. Wrote replacements, see file dfrexp.c. Define the symbol DOS when
+  compiling the assembler under 16-bit DOS. Also, if you have trouble with
+  malloc() under DOS, you might try defining MYALLOC, which supplants most
+  malloc calls with a simple homebrewn memory allocation (see file utils.c.)
+
+* Version 1.1a fixes the COMMON statement, which got broken somewhere
+  along the way.
+
+
+V. 1.0 changes w.r.t. 0.9:
+
+* Hey, a majestic "1" in front of the version decimal point!
+  Coincidentally, as1750 is leaving the beta-test stadium. All
+  features mentioned in the manpage are functional.
+
+* Hex numbers are prefixed by "#" or "0x"; octal numbers are prefixed by
+  "0"; and binary numbers are prefixed by "@".
+
+* Added file vmsbuild.com for building as1750 with DEC C under VMS.
+  Ignore any "symbol name truncated" warnings during the build.
+
+* Removed restriction that WHILE loops were only legal within macros.
+
+* Improved macro symbol substitution. See file ./testfiles/intr.s
+  to get an impression.
+
+* Replaced the unwieldy hardcoded mnemon scanner by a table based scanner.
+  Removed file opcodes.h. See file as.c for the new scanner.
+
+* Removed command line option "-B", as1750 always assembles extended
+  architecture instructions.
+
+* Implemented an argc/argv-type sourceline processing in main.c and as.c.
+  Thanks to smalley@igate1.hac.com for suggesting this.
+
+* Updated the man page to reflect recent changes.
+
+
+V. 0.9 changes w.r.t. 0.8:
+
+* Most code improvements for this version by Susan Smalley (sesmall@ibm.net):
+
+* Added function get_sym_num() so that constant symbols defined by EQU
+  can appear anywhere an immediate number may.
+
+* Check for macro symbol table overflow prior to adding a macro symbol
+  definition.
+
+* Index register in Base Relative Indexed address mode was erroneously
+  optional.
+
+* Added missing MIL-STD-1750 predefined condition code names for JC(I).
+
+* Repaired 1750 instructions LST and LSTI.
+
+* Added the STZ instruction (shorthand for STC 0.)
+
+* Implemented the listing options (see manpage, option "-a".) Any suggestions
+  for further improvement in contents and presentation are most welcome.
+
+
+V. 0.8 changes w.r.t. 0.7:
+
+* Changed the command line switch -C to take a parameter, the main program
+  name. (see manpage)
+
+* Supplying multiple float values separated by commas in a DATAF or DATAEF
+  statements didn't work, fixed that.
+
+* Added binary notation for numeric constants (prefix character: @ ,
+  see manpage.)
+
+* Added *some* support for TLD assembler syntax: based numbers (2#n# and
+  16#n#), MODULE, IMPORT, EXPORT, LIST, and simple cases of CSECT.
+  However, big differences in the syntax of SET macro variables persist.
+
+* Added macro symbol expansion for the Label field. Repaired operand-
+  field macro expansion that apparently got broke somewhere along the way.
+
+* Made it all compile on a DOS PC-AT under Turbo-C. Doing this has revealed
+  interesting little oversights. Needs at least the Large memory model.
+  A short program assembled okay, but more testing needed.
+
+* Changed the static `reloc' array to `relblk', which dynamically expands
+  in the same way `objblk' does.
+
+* Fixed a grave problem in TLD LDM file generation where every 15th output
+  word was missing.
+
+* Changed the default load file type to TLD LDM.
+
+
+V. 0.7 changes w.r.t. 0.6:
+
+* Corrected relative branch calculation for code segments with an ORG directive
+  (reported by Mario Kocian, kc@shraero.co.at)
+
+* Fixed the NOP and BPT statements (bug reported by kc@shraero.co.at)
+
+
+V. 0.6 changes w.r.t. 0.5:
+
+* Added support for TLD Load Module generation. See manpage, option -o.
+
+* Implemented option -I.  New environment variable AS1750_INC_PATH
+  further enhances the searching for includefiles.
+  
+* The listing to stdout now shows ORGed regions with a letter 'o'
+  prefixed to the running address.
+
+* Split the monolithic common.h file into smaller header files for better
+  modularity.
+
+* Fixed bug in INCM/DECM that resulted in the increment/decrement being
+  off by one. (Reported by Jiri Gaisler, ESA/ESTEC)
+
+* jgais@wd.estec.esa.nl (J. Gaisler) reported and fixed bug in the COMMON
+  statement where the declared symbol would fail to be put in the current
+  section.
+
+* Changed implementation of symbol table from dynamically expanding array
+  to binary tree where the symbol name is the sort key of the tree.
+  See file syms.c.
+
+
+V. 0.5 changes w.r.t. 0.4:
+
+* Removed remaining problems with address expressions (i.e., rewrote
+  function parse_addr in file as.c.) Implemented subtraction between
+  two relocatable symbols of same section. Documented the valid forms
+  of address expressions (see manpage file as1750.1.)
+
+* Inserted a missing "#include <sys/types.h>" in file main.c (thanks to
+  problem report by Pekka.Ruuska@vtt.fi.) The assembler should now build
+  fine on most Unix machines, VMS, and even MS-DOG (with 32-bit compiler.)
+
+
+V. 0.4 changes w.r.t. 0.3:
+
+* The biggest news is that a 6400 line hand written assembler program
+  has been successfully translated by as1750. Getting for real :-)
+
+* Added command line option "-S" to enable case sensitivity for symbols.
+  By default, the assembler is now entirely case insensitive.
+
+* Implemented the DATAC statement. (Byte-packs strings into 16-bit words.)
+
+* Numbers can also be given as two-byte strings, e.g. "AB" would be the 
+  number 04142 (hex.)
+
+* Address labels may now also be used in the data field of DATA statements.
+
+* EQU defined constants may now be used in all the places that one would
+  expect.
+
+* Fixed problems with the ELSIF statement, and minor problems with macro
+  expressions.
+
+* Fixed the D, LM, STM, and the test/set/reset-bit instructions.
+
+* Added MMU related XIO command names (LMP,WIPR,WOPR,RMP,RIPR,ROPR.)
+
+
+V. 0.3 changes w.r.t. 0.2:
+
+* Call-envelope option changed from "-S" (suppress) to "-C" (enable.)
+  I.e., you now must supply option -C to obtain the main-program call
+  envelope.
+
+* Implemented the ORG and UNORG directives. This entailed major change
+  to the internal object code representation.
+
+* Added support for MIL-STD-1750B statements SFBS, UA, UAR, US, USR, UC,
+  UCR, UCIM, STE, DSTE, LE, DLE. Command-line option "-B" enables these.
+
+* Hex numbers may now also contain small letters [a-f].
+
+* The listing to stdout shows addresses in 8-hexdigit width (32 bits.)
+  Counting still to be improved (should be made to count ORGs right.)
+
+
+V. 0.2 changes w.r.t. 0.1:
+
+* Address management of sections Init and Normal was ridden with bugs,
+  cleaned them up.
+
+* The listing to stdout counted absolute addresses, now counts relative
+  addresses per section (Init/Normal). But to be improved still further.
+
+* Added a component `isreferenced' to symbol_t. Avoid bogus errors on
+  symbols declared GLOBAL, but never referenced.
+
+* Unified the `data_count[]' and `instruction_count' into `section_count[]'.
+
+* Added a "call envelope" to assembly of main programs as follows:
+		SJS	R15,main
+		BR	*
+  so that programs end gracefully. Generation of the main program call 
+  envelope can be suppressed by the command line switch "-S".
+
+* Fixed bug in DATAL directive.
+
+* Builtin function `DEF()' now also accepted in small letters.
+

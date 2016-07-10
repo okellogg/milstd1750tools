@@ -1,0 +1,52 @@
+/* xiodef.c -- Mil-Std-1750 XIO related definitions */
+
+#include "xiodef.h"
+
+const struct xioinf xio[] =
+  {
+    { X_SMK,   "SMK"  },
+    { X_CLIR,  "CLIR" },
+    { X_ENBL,  "ENBL" },
+    { X_DSBL,  "DSBL" },
+    { X_RPI,   "RPI"  },
+    { X_SPI,   "SPI"  },
+    { X_OD,    "OD"   },
+    { X_RNS,   "RNS"  },
+    { X_WSW,   "WSW"  },
+    { X_CO,    "CO"   },
+    { X_CLC,   "CLC"  },
+    { X_MPEN,  "MPEN" },
+    { X_ESUR,  "ESUR" },
+    { X_DSUR,  "DSUR" },
+    { X_DMAE,  "DMAE" },
+    { X_DMAD,  "DMAD" },
+    { X_TAS,   "TAS"  },
+    { X_TAH,   "TAH"  },
+    { X_OTA,   "OTA"  },
+    { X_GO,    "GO"   },
+    { X_TBS,   "TBS"  },
+    { X_TBH,   "TBH"  },
+    { X_OTB,   "OTB"  },
+    { X_LMP,   "LMP"  },
+    { X_WIPR,  "WIPR" },
+    { X_WOPR,  "WOPR" },
+    { X_RMK,   "RMK"  },
+    { X_RIC1,  "RIC1" },
+    { X_RIC2,  "RIC2" },
+    { X_RPIR,  "RPIR" },
+    { X_RDOR,  "RDOR" },
+    { X_RDI,   "RDI"  },
+    { X_TPIO,  "TPIO" },
+    { X_RMFS,  "RMFS" },
+    { X_RSW,   "RSW"  },
+    { X_RCFR,  "RCFR" },
+    { X_CI,    "CI"   },
+    { X_RCS,   "RCS"  },
+    { X_ITA,   "ITA"  },
+    { X_ITB,   "ITB"  },
+    { X_RMP,   "RMP"  },
+    { X_RIPR,  "RIPR" },
+    { X_ROPR,  "ROPR" },
+    { 0x0000,  "" }
+  };
+

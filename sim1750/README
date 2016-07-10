@@ -1,0 +1,92 @@
+sim1750 -- software simulation of the MIL-STD-1750A processor
+
+See file COPYING for licensing and distribution information.
+
+BUILDING UNDER UNIX
+-------------------
+
+Type
+	make opt
+
+in this directory. An executable named "sim1750" will be produced. In
+order to invoke sim1750 from anywhere, copy the sim1750 executable to
+a `bin' directory (such as ~/bin, /usr/local/bin, /usr/bin etc.), or
+to any directory that is included in your PATH environment variable.
+
+Type
+	sim1750
+
+to invoke. Then type "help" to see available commands with short explanations.
+
+
+BUILDING UNDER VMS
+------------------
+
+sim1750 has only been built on a VAX with DEC C, not an AXP yet.
+To build under VMS, copy the file vmsbuild.com and all files from the ./src
+subdirectory to a build directory on your VMS machine. Then invoke
+
+	@vmsbuild
+
+and an executable named SIM1750.EXE will be produced. In order to
+invoke sim1750 from anywhere, put a line in the machine's SYLOGIN.COM 
+(or your LOGIN.COM) as follows:
+
+	$ sim1750 :== $ your_device:[your_path]sim1750.exe
+
+(Replace your_device and your_path to point to the location where
+SIM1750.EXE resides.)
+
+
+BUILDING UNDER DOS/WIN32/WINNT
+------------------------------
+
+The simulator has been built and tested under both 32-bit Windows-95
+(using Borland C/C++ or Cygnus Win32 GCC, thanks to M. Martignano at
+ESA/ESTEC) and 16-bit plain DOS (using Borland C/C++ 3.0.)
+Do the following:
+
+* If compiling under 16-bit DOS with Borland C/C++, then define a
+  project SIM1750.PRJ that includes all the .c files from the ./src
+  subdirectory. This procedure is different depending on your OS
+  environment and compiler used.
+
+* Define following macro symbols for compilation:
+
+  STRDUP;STRNCMP
+
+* If under 16-bit DOS, choose at least the Large memory model for
+  compilation.
+
+* Under DOS, there is a very noticeable difference in execution
+  time between SPEED OFF and SPEED ON. With SPEED ON, it is
+  not possible to interrupt execution by pressing <Control-C>,
+  but the simulation runs much faster.
+
+--
+
+Timing-info supported for following processors: PACE, F9450, GVSC,
+MA31750, MAS281.
+
+Define the appropriate symbol in file sys_defs.h. Also define the
+symbol uP_CYCLE_IN_NS in the same file. E.g. for a PACE chip at 20 MHz:
+
+	#define PACE
+	#define uP_CYCLE_IN_NS 50
+
+If you'd like to use sim1750 for a different processor, you have two
+options:
+  1. Leave the target processor undefined and use simulator without
+     timing-info. This means that operations on Timer A and B are not
+     available (timer management is coupled with instruction cycle counting.)
+  2. Define the instruction cycle times for your processor in file stime.h.
+     This is the preferred solution.
+
+Some online help is available, but no manpage yet. Sorry.
+Moot advice of the day:
+  "Use the Source, Luke! The Source will always be with you." :-)
+
+Please report your enhancements and bugs found to:
+
+	oliver.kellogg@space.otn.dasa.de
+

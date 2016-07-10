@@ -1,0 +1,311 @@
+Changes in sim1750 version 2.3b:
+
+* Renamed files mem.[ch] to phys_mem.[ch] to avoid conflict with
+  Borland predefined include files.
+
+* Added new command `pload' to load binary files in the ASL P-format.
+  For more information on the ASL assembler, see
+  ftp://zam091.zam.kfa-juelich.de/pub/msdos/assembler/
+  Integration of as1750 with ASL has led to renaming files fltcnv.[ch]
+  to flt1750.[ch].
+
+* Corrected the FLOATING_TWO_TO_THE_THIRTYNINE value in flt1750.c
+  (thanks to C. Nettleton, nettleto@ccfn.demon.co.uk)
+
+* C. Nettleton reworked the file arith.c, adopted his version.
+  This cleans up handling of the Carry bit in the Condition Status
+  as well as under/overflow.
+
+
+Changes in sim1750 version 2.3a:
+
+* Made sim1750 run under plain 16-bit DOS (using Borland C/C++) and under
+  Windows-95 using Borland C or Cygwin Win32 GCC (thanks to M. Martignano
+  of ESA/ESTEC, maurizio@wm.estec.esa.nl). See the README file for notes
+  on building under DOS.
+
+* Corrected the vmsbuild.com file to use /G_FLOAT for compilation.
+  (Floating over/underflow interrupt generation in arith() does not work
+  properly with the D_FLOAT format.)
+
+* Corrected the SMALLEST_FLOAT value in fltcnv.c.
+
+* Re-grouping of the stuff in sys_io.h/sys_io.c for better modularity
+  has led to the elimination of those two files. lprintf() is now in
+  status.c and init_io() is in cmd.c.
+
+
+Changes in sim1750 version 2.3:
+
+* Added on-line help texts for most commands. Syntax:  help <commandname>
+
+* Added flexible expression syntax for fill patterns in the FI command.
+  See `help fi'.
+
+* Command names can now be abbreviated. Instead of `go', you can type just
+  `g'. The only restriction is that enough characters must be given for the
+  command not to be ambiguous.
+
+* Addresses given as arguments to commands are now physical by default.
+  Logical addresses can be given by: <address_state><i_o><address>.
+  For example, 1o87FA is the logical address 87FA in the operand page of
+  address state 1, or 0iccf is the logical address 0CCF in the instruction
+  page of address state 0. See the help info on the TR command.
+
+* Added command `tr' to translate from logical to physical addresses.
+  See the respective online help info for details.
+
+* Added symbolic breakpoints for those load formats that support symbols.
+  If the file last loaded contained symbols, you can type `br <symbolname>'.
+
+* Fixed a bad bug in the info()/warning()/error() functions in status.c
+  that would make the simulator often dump core.
+
+* Fixed execution behaviour of simulator after encountering a BPT
+  instruction.
+
+* Renamed the `status' command to `info'. The command additionally displays
+  the memory regions used. Further, `info on' enables verbose mode of 
+  the simulator and `info off' switches to quiet mode.
+
+* Added support for TLD LLM files. Command is `ldm' (same as for LDM format,
+  automatic file type detection.)
+
+* Fixed the `save' command.
+
+* Fix to XIO Read/Write Operand/Instruction Page Register (ROPR/RIPR/
+  WOPR/WIPR) sent in by Jonathan.Yount@specastro.com.
+  
+* Fixed the DNEG instruction (reported by Sue Smalley, smalley@igate1.hac.com)
+
+* Corrected treatment of the Carry flag during arithmetic. Improved
+  handling of arithmetic overflow in arith().
+
+* Execution will halt on reading from uninitialized memory locations.
+
+* The disassembly function now detects invalid opcodes.
+
+* Execution got faster yet again due to a very simple optimization in
+  workout_interrupts(), a test for (simreg.pir == 0).
+
+* Added optional use of the `long long int' data type for compiling sim1750.
+  To activate, put -DLONGLONG in the CFLAGS if your C compiler supports
+  this type. A word of warning: gcc-2.7.2 on Linux-x86 seems to have a
+  `long long' related code generation problem when compiling with optimization
+  (make opt).
+
+* Thanks are in order to Chris Nettleton of Farnborough, UK
+  (nettleto@ccfn.demon.co.uk) for contributing to this version
+  in a major way:
+
+* Added support for the Common Object File Format (COFF). New command `lcf'.
+
+* Added command `bt' for backtracing program execution.
+
+* Added MAS281 timing figures to stime.h. Added support for the ERA MAS281
+  board in do_xio().
+
+* First implementation of optional command line arguments for sim1750
+  invocation:
+    -q          run sim1750 in quiet mode
+    -c <file>   immediately execute the COFF file given.
+    -t <file>   immediately execute the TekHex file given.
+    -l <file>   immediately execute the TLDLDM file given.
+
+* Fixes to Timer B processing and Timer A nanosecond counting. Added
+  a statistic of total execution time in microseconds (see the `info'
+  command.)
+
+* Fixed BEX instruction.
+
+* Fixed one of the overflow checks in long-integer multiplication.
+
+* Added support for GNU readline. Put -DGNU_READLINE in the CFLAGS of
+  the Makefile if you have readline on your system.
+
+
+Changes of sim1750 version 2.2 w.r.t. version 2.1:
+
+* Corrected the reg_names array in disp.c.
+
+* Made command line input string comparisons case insensitive.
+
+* Corrected Timer B interrupt generation.
+
+* Corrected the FNEG instruction.
+
+* Corrected condition-code setting of instructions SQRT and EFIX.
+
+* Prepared sim1750 for integration with the BSVC simulator framework.
+  (see ftp://ftp.eos.ncsu.edu/pub/bsvc)
+
+
+Changes of sim1750 version 2.1 w.r.t. version 2.0:
+
+* Further modularized functions into separate files. Renamed some files
+  for more uniform naming.
+
+* Adding the feature of data breakpoints has entailed reverting back to
+  the old implementation of breakpoints. If simulation speed is important,
+  then use "make opt" for building sim1750 (that invokes gcc with -O.)
+  For the syntax of data breakpoints, see the "help" command.
+  
+* Reimplemented the "save" command that saves the current simulator
+  memory image to a TekHex file, using the file tekhex.c from as1750.
+  The former sim1750 tekhex.c is now named tekops.c. Unified all
+  non-TekHex loadfile functions into file loadfile.c.
+
+* Changed implementation of simulator memory to use on-demand dynamic page
+  allocation. Memory alllocation is now friendlier towards small host systems
+  such as PCs under 16-bit DOS.
+
+
+Changes of sim1750 version 2.0 w.r.t. version 1.9:
+
+* Thanks to mario.kocian@shraero.co.at for most of the bugreports and
+  suggestions for this release:
+
+* Command `ss *' executes entire subroutine call, then halts.
+  (Some debuggers call this feature "step over" or "next".)
+
+* Command `bc *' clears all breakpoints.
+
+* Corrected parameter description for the `bc' command.
+
+* Corrected index register disassembly in the BX mode instructions (LBX etc.)
+
+* Added plain text display of the CS (Condition Status) bits: C,P,Z,N, or 0.
+
+* Corrected CS setting of the Test Bit commands (TB, TBI, TBR, TVBR, TSB.)
+
+* Added file do_xio.c for implementation of user defined XIOs.
+
+* In the distribution supplied sample implementation of function do_xio(),
+  XIO read on an unimplemented XIO address will prompt the user for a
+  value to be loaded into the receiving register. (This behavior can
+  be changed, see file do_xio.c.)
+
+* Corrected the argument to the isatty() call in sys_io.c.
+
+* Corrected the Instruction Counter incrementing in ex_cbl() of exfunc.c.
+
+* Moved Tek Hex loadfile support from sfunc.c into its own file, tekhex.c.
+  Removed file symbols.h. Support for symbolic addresses added for TekHex
+  loadfiles: data/code labels and label references are dislayed with their
+  assembler source names when possible. (Assembler as1750 expanded
+  accordingly.) For an example, load the hello.hex program from the
+  load-samplefiles subdirectory, and do 'di 100 10'.
+
+* Moved TLD LDM support from sfunc.c into its own file, tldldm.c.
+
+* Breakpoints are now done by physically replacing code by the BPT
+  instruction. This change alone has brought a three to fourfold increase
+  in simulation speed. Removed file sbreak.c (breakpoints are now implemented
+  in sfunc.c and sexec.c.)
+
+
+Changes of sim1750 version 1.9 w.r.t. version 1.8:
+
+* Reorganized things for greater modularity. In particular, the
+  disassembler can now also be used standalone. File dism1750.c replaces
+  the former sdisasm.c. Removed files datadefs.h, arrays.c, and tekhex.c.
+  Introduced new file arch.h. Further, deleted unused and test-purpose code.
+  Dont' be worried that the sim1750 source distribution got smaller, that's
+  actually an improvement.
+
+* Added command synonym "quit" for "exit"
+
+
+Changes of sim1750 version 1.8 w.r.t. version 1.7:
+
+* Made the simulator compile and run on a DOS PC-AT compatible computer
+  (using Turbo-C in Large memory model to compile.)
+
+* On a Unix host, pressing Control-C more than once will now work.
+
+* Did some code polishing in arrays.c, sdisasm.c, and exfunc.c. Implemented
+  some more of the GVSC extended architecture instructions.
+
+
+Changes of sim1750 version 1.7 w.r.t. version 1.6:
+
+* Implemented commands "df" and "de" for displaying operand-page memory
+  interpreted as 1750 floats (df) or extended floats (de).
+
+* Implemented command "reset" that will reset the simulator into its power-on
+  state. (Feature suggested by Mario Kocian, kc@shraero.co.at)
+
+* Corrected interpretation of TLD LDM transfer address. (Bug reported by
+  Mario Kocian, kc@shraero.co.at)
+
+* Corrected updating of CS flags for statements: SLL,SRL,SRA,SLC,DSLL,DSRL,
+  DSRA,LE,DLE.  (Bug reported by Mario Kocian, kc@shraero.co.at)
+
+
+Changes of sim1750 version 1.6 w.r.t. version 1.5b:
+
+* Added support for TLD Load Module files. New command "ldm <filename>".
+
+* Started cleaning up simulator message output handling. Introduced message
+  classes: error, warning, informational. Removed file sys_err.c, added new
+  file utils.c. To be continued.
+
+* J. Gaisler (jgais@wd.estec.esa.nl) reported and fixed problem in sim_arith()
+  related to 16-bit operand, 32-bit result multiply instructions.
+
+* Timing info for Marconi MA31750 added to stime.h by Jiri Gaisler, ESA/ESTEC
+  (jgais@wd.estec.esa.nl).
+
+* Added support for IBM User Console binary files in Program Store (PS DL)
+  format. New command "pslo <filename>".
+
+* Added commands to show software copying policy and warranty information
+  as requested for interactive programs in the GNU Public License.
+  New commands "shoc" (copying) and "war" (warranty).
+
+
+Changes of sim1750 version 1.5b w.r.t. version 1.5:
+
+* Fixed grave bug in the condition code setting based on 16-bit operands
+  in function compare() (file sarith.c)
+
+* Changed call to workout_int() back so that it is called after execution
+  of any instruction. (Reason: this behavior is more in line with the
+  MIL-STD.)
+
+
+Changes of sim1750 version 1.5 w.r.t. version 1.4:
+
+* The "pending interrupt" message output has been changed so that output
+  happens only once per interrupt occurrence. The message had been printed
+  upon execution of all statements after the first occurrence of a given
+  interrupt (bug reported by Pekka.Ruuska@vtt.fi)
+
+* The floating point conversion routines (file fltcnv.c) are now exact.
+
+* Removed bug in the DLR statement where DLR R(n+1),R(n) didn't work.
+
+
+Changes of sim1750 version 1.4 w.r.t. version 1.3:
+
+* Corrected the help info on the "trace" command. (trace <n_instructions>
+  instead of trace on/off.)
+
+* Threw out the `warn_uninitialized_memory_read' flag (taken care of
+  by the `was_written' array.)
+
+* Added the MIL-STD-1750B extended-address instructions LE,DLE,STE,DSTE
+  (to be tested.)
+
+
+Changes of sim1750 version 1.3 w.r.t. version 1.2:
+
+* Cleaned up condition-code handling. Threw out file condstat.c; all the
+  setting of condition codes is now done by update_cs() in file sarith.c.
+
+* Started adding support for the TLD Load Module file format.
+
+* Shifted system configuration symbols (processor-brand symbol, 
+  uP_SCYCLE_IN_NS, GOTIMER_PERIOD_IN_10uSEC) to file sys_defs.h.
+  Renamed file system.h to hostsys.h.
+
