@@ -1914,8 +1914,8 @@ ex_lsti ()		/* 7Cxy */
     {
       GET (DATA, source, (short *) &source);
       GET (DATA, source,     (short *) &simreg.mk);
-      GET (DATA, source + 1, (short *) &simreg.sw);
       GET (DATA, source + 2, (short *) &simreg.ic);
+      GET (DATA, source + 1, (short *) &simreg.sw);
     }
 
   return (nc_LSTI);
@@ -1938,8 +1938,8 @@ ex_lst ()		/* 7Dxy */
   else
     {
       GET (DATA, (ushort) source,     (short *) &simreg.mk);
-      GET (DATA, (ushort) source + 1, (short *) &simreg.sw);
       GET (DATA, (ushort) source + 2, (short *) &simreg.ic);
+      GET (DATA, (ushort) source + 1, (short *) &simreg.sw);
     }
 
   return (nc_LST);
