@@ -5,10 +5,8 @@
 /* Component :    smemacc.c -- simulation-level memory access functions    */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -32,24 +30,24 @@
 #include "arch.h"
 #include "peekpoke.h"
 
-ulong
+uint
 get_phys_address (int bank, ushort as, ushort log_addr)
 {
   ushort page = pagereg[bank][(int) as][(int) (log_addr >> 12) & 0xF].ppa;
-  return ((ulong) page << 12) | (ulong) (log_addr & 0x0FFF);
+  return ((uint) page << 12) | (uint) (log_addr & 0x0FFF);
 }
 
 bool
 get_raw (int bank, ushort as, ushort address, ushort *value)
 {
-  ulong phys_address = get_phys_address (bank, as, address);
+  uint phys_address = get_phys_address (bank, as, address);
   return peek (phys_address, value);
 }
 
 void
 store_raw (int bank, ushort as, ushort address, ushort value)
 {
-  ulong phys_address = get_phys_address (bank, as, address);
+  uint phys_address = get_phys_address (bank, as, address);
   poke (phys_address, value);
 }
 

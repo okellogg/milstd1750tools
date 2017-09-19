@@ -11,10 +11,9 @@ extern char  *nopath (char *full_filename);
 extern char  upcase (char c);
 extern char  itox (int i);
 extern int   xtoi (char c);
-#ifndef STRDUP
-extern char  *strdup (char *str);
-#endif
+#ifndef STRNDUP
 extern char  *strndup (char *str, int len);
+#endif
 #ifndef STRNCASECMP
 extern int   strncasecmp (char *s1, char *s2, int len);
 #endif
@@ -26,7 +25,7 @@ extern char  *findc (char *s, char c);
 extern char  *skip_white (char *s);
 extern char  *skip_nonwhite (char *s);
 extern char  *skip_symbol (char *s);
-extern long  get_16bit_hexnum (char *s);
-extern long  get_nibbles (char *src, int n_nibbles);
-extern void  put_nibbles (char *dst, unsigned long src, int n_nibbles);
+extern int   get_16bit_hexnum (char *s);
+extern int   get_nibbles (char *src, int n_nibbles);
+extern void  put_nibbles (char *dst, unsigned int src, int n_nibbles);
 

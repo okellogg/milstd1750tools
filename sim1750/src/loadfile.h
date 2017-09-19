@@ -3,8 +3,8 @@
 #ifndef _LOADFILE_H
 #define _LOADFILE_H
 
-extern char *find_labelname (unsigned long address);
-extern long find_address (char *labelname);
+extern char *find_labelname (unsigned int address);
+extern int  find_address (char *labelname);
 extern void init_load_formats ();
 extern int  si_dispsym (int argc, char *argv[]);
 extern int  si_prolo (int argc, char *argv[]);

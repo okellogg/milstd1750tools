@@ -5,8 +5,8 @@
 /* Component :     stime.h -- chips' instruction timing definitions        */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Contact   :           oliver.kellogg@space.otn.dasa.de                  */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */

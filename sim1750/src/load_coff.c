@@ -248,10 +248,10 @@ struct internal_syment
 {
   char e_name [E_SYMNMLEN];
   struct {
-    long e_zeroes;
-    long e_offset;
+    int e_zeroes;
+    int e_offset;
   } e;
-  long e_value;
+  int e_value;
   short e_scnum;
   unsigned short e_type;
   char e_sclass;
@@ -317,9 +317,9 @@ union auxent {
  */
 static ushort f_magic; 
 static ushort f_nscns;
-static long f_timdat;          
-static long f_symptr;        
-static long f_nsyms;       
+static int f_timdat;          
+static int f_symptr;        
+static int f_nsyms;       
 static ushort f_opthdr;  
 static ushort f_flags; 
 
@@ -327,12 +327,12 @@ static ushort f_flags;
  */
 static short magic;
 static short vstamp;
-static long tsize;
-static long dsize;
-static long bsize;
-static long entry;
-static long text_start;
-static long data_start;
+static int tsize;
+static int dsize;
+static int bsize;
+static int entry;
+static int text_start;
+static int data_start;
 
 /* The string table
 */
@@ -342,29 +342,29 @@ static int str_length = 0;
 /* Contents of most recent section header
  */
 static char   s_name [9];
-static ulong  s_paddr;
-static ulong  s_vaddr;
-static ulong  s_size; 
-static ulong  s_scnptr;
-static ulong  s_relptr;
-static ulong  s_lnnoptr;
+static uint  s_paddr;
+static uint  s_vaddr;
+static uint  s_size; 
+static uint  s_scnptr;
+static uint  s_relptr;
+static uint  s_lnnoptr;
 static ushort s_nreloc;
 static ushort s_nlnno; 
-static ulong  s_flags;
+static uint  s_flags;
 
 /* Contents of most recent reloc record
  */
-static ulong r_vaddr;
-static ulong r_symndx;
+static uint r_vaddr;
+static uint r_symndx;
 static ushort r_type;
 #ifdef M1750_COFF_OFFSET
-static ulong r_offset;
+static uint r_offset;
 #endif
 
 /* Contents of the most recent line number record
 */
-static ulong l_symndx; 
-static ulong l_paddr; 
+static uint l_symndx; 
+static uint l_paddr; 
 static ushort l_lnno; 
 
 
@@ -376,20 +376,20 @@ get_file_header ()
   f_nscns  = ((ushort) file_header.f_nscns  [0] << 8) +
               (ushort) file_header.f_nscns  [1];
 
-  f_timdat = ((ulong) file_header.f_timdat [0] << 24) + 
-             ((ulong) file_header.f_timdat [1] << 16) +
-             ((ulong) file_header.f_timdat [2] << 8) + 
-             ((ulong) file_header.f_timdat [3]);
+  f_timdat = ((uint) file_header.f_timdat [0] << 24) + 
+             ((uint) file_header.f_timdat [1] << 16) +
+             ((uint) file_header.f_timdat [2] << 8) + 
+             ((uint) file_header.f_timdat [3]);
 
-  f_symptr = ((ulong) file_header.f_symptr [0] << 24) + 
-             ((ulong) file_header.f_symptr [1] << 16) +
-             ((ulong) file_header.f_symptr [2] << 8) + 
-             ((ulong) file_header.f_symptr [3]);
+  f_symptr = ((uint) file_header.f_symptr [0] << 24) + 
+             ((uint) file_header.f_symptr [1] << 16) +
+             ((uint) file_header.f_symptr [2] << 8) + 
+             ((uint) file_header.f_symptr [3]);
 
-  f_nsyms  = ((ulong) file_header.f_nsyms  [0] << 24) + 
-             ((ulong) file_header.f_nsyms  [1] << 16) +
-             ((ulong) file_header.f_nsyms  [2] << 8) + 
-             ((ulong) file_header.f_nsyms  [3]);
+  f_nsyms  = ((uint) file_header.f_nsyms  [0] << 24) + 
+             ((uint) file_header.f_nsyms  [1] << 16) +
+             ((uint) file_header.f_nsyms  [2] << 8) + 
+             ((uint) file_header.f_nsyms  [3]);
 
   f_opthdr = ((ushort) file_header.f_opthdr [0] << 8) +
               (ushort) file_header.f_opthdr [1];
@@ -403,9 +403,9 @@ dump_file_header ()
   printf ("----File-Header---------------------------------------------\n");
   printf ("Magic number (in octal)  = 0%o\n",    f_magic);
   printf ("Number of sections       = %d\n",     f_nscns);
-  printf ("Time & date stamp        = %s", ctime ((unsigned long *)&f_timdat));
-  printf ("File pointer to symtab   = 0x%08lX\n", f_symptr);
-  printf ("Number of symtab entries = %ld\n",     f_nsyms);
+  printf ("Time & date stamp        = %s", ctime ((time_t *)&f_timdat));
+  printf ("File pointer to symtab   = 0x%08X\n", f_symptr);
+  printf ("Number of symtab entries = %d\n",     f_nsyms);
   printf ("Sizeof (optional hdr)    = %d\n",     f_opthdr);
   printf ("Flags                    = 0x%04X\n", f_flags);
 
@@ -452,35 +452,35 @@ get_opt_header ()
   vstamp = ((ushort) aout_header.magic [0] << 8) +
             (ushort) aout_header.vstamp [1];
 
-  tsize  = ((ulong) aout_header.tsize [0] << 24) + 
-           ((ulong) aout_header.tsize [1] << 16) +
-           ((ulong) aout_header.tsize [2] << 8) + 
-           ((ulong) aout_header.tsize [3]);
+  tsize  = ((uint) aout_header.tsize [0] << 24) + 
+           ((uint) aout_header.tsize [1] << 16) +
+           ((uint) aout_header.tsize [2] << 8) + 
+           ((uint) aout_header.tsize [3]);
 
-  dsize  = ((ulong) aout_header.dsize [0] << 24) + 
-           ((ulong) aout_header.dsize [1] << 16) +
-           ((ulong) aout_header.dsize [2] << 8) + 
-           ((ulong) aout_header.dsize [3]);
+  dsize  = ((uint) aout_header.dsize [0] << 24) + 
+           ((uint) aout_header.dsize [1] << 16) +
+           ((uint) aout_header.dsize [2] << 8) + 
+           ((uint) aout_header.dsize [3]);
 
-  bsize  = ((ulong) aout_header.bsize [0] << 24) + 
-           ((ulong) aout_header.bsize [1] << 16) +
-           ((ulong) aout_header.bsize [2] << 8) + 
-           ((ulong) aout_header.bsize [3]);
+  bsize  = ((uint) aout_header.bsize [0] << 24) + 
+           ((uint) aout_header.bsize [1] << 16) +
+           ((uint) aout_header.bsize [2] << 8) + 
+           ((uint) aout_header.bsize [3]);
 
-  entry  = ((ulong) aout_header.entry [0] << 24) + 
-           ((ulong) aout_header.entry [1] << 16) +
-           ((ulong) aout_header.entry [2] << 8) + 
-           ((ulong) aout_header.entry [3]);
+  entry  = ((uint) aout_header.entry [0] << 24) + 
+           ((uint) aout_header.entry [1] << 16) +
+           ((uint) aout_header.entry [2] << 8) + 
+           ((uint) aout_header.entry [3]);
 
-  text_start = ((ulong) aout_header.text_start [0] << 24) + 
-               ((ulong) aout_header.text_start [1] << 16) +
-               ((ulong) aout_header.text_start [2] << 8) + 
-               ((ulong) aout_header.text_start [3]);
+  text_start = ((uint) aout_header.text_start [0] << 24) + 
+               ((uint) aout_header.text_start [1] << 16) +
+               ((uint) aout_header.text_start [2] << 8) + 
+               ((uint) aout_header.text_start [3]);
 
-  data_start = ((ulong) aout_header.data_start [0] << 24) + 
-               ((ulong) aout_header.data_start [1] << 16) +
-               ((ulong) aout_header.data_start [2] << 8) + 
-               ((ulong) aout_header.data_start [3]);
+  data_start = ((uint) aout_header.data_start [0] << 24) + 
+               ((uint) aout_header.data_start [1] << 16) +
+               ((uint) aout_header.data_start [2] << 8) + 
+               ((uint) aout_header.data_start [3]);
 }
 
 static void 
@@ -489,12 +489,12 @@ dump_opt_header ()
   printf ("----Optional-header------------------------------------------\n");
   printf ("Magic number             = %o\n", magic);
   printf ("Version stamp            = %X\n", vstamp);
-  printf ("Size of first .text      = %ld\n", tsize);
-  printf ("Size of first .data      = %ld\n", dsize);
-  printf ("Size of first .bss       = %ld\n", bsize);
-  printf ("Entry point              = 0x%08lX\n", entry);
-  printf ("Start of text            = 0x%08lX\n", text_start);
-  printf ("Start of data            = 0x%08lX\n", data_start);
+  printf ("Size of first .text      = %d\n", tsize);
+  printf ("Size of first .data      = %d\n", dsize);
+  printf ("Size of first .bss       = %d\n", bsize);
+  printf ("Entry point              = 0x%08X\n", entry);
+  printf ("Start of text            = 0x%08X\n", text_start);
+  printf ("Start of data            = 0x%08X\n", data_start);
 }
 
 static void 
@@ -503,45 +503,45 @@ get_sec_header ()
   memset (s_name, 0, 9);
   memcpy (s_name, sec_header.s_name,8);
    
-  s_paddr   = ((ulong) sec_header.s_paddr [0] << 24) + 
-              ((ulong) sec_header.s_paddr [1] << 16) +
-              ((ulong) sec_header.s_paddr [2] << 8) + 
-              ((ulong) sec_header.s_paddr [3]);
+  s_paddr   = ((uint) sec_header.s_paddr [0] << 24) + 
+              ((uint) sec_header.s_paddr [1] << 16) +
+              ((uint) sec_header.s_paddr [2] << 8) + 
+              ((uint) sec_header.s_paddr [3]);
     
-  s_vaddr   = ((ulong) sec_header.s_vaddr [0] << 24) + 
-              ((ulong) sec_header.s_vaddr [1] << 16) +
-              ((ulong) sec_header.s_vaddr [2] << 8) + 
-              ((ulong) sec_header.s_vaddr [3]);
+  s_vaddr   = ((uint) sec_header.s_vaddr [0] << 24) + 
+              ((uint) sec_header.s_vaddr [1] << 16) +
+              ((uint) sec_header.s_vaddr [2] << 8) + 
+              ((uint) sec_header.s_vaddr [3]);
     
-  s_size    = ((ulong) sec_header.s_size  [0] << 24) + 
-              ((ulong) sec_header.s_size  [1] << 16) +
-              ((ulong) sec_header.s_size  [2] << 8) + 
-              ((ulong) sec_header.s_size  [3]);
+  s_size    = ((uint) sec_header.s_size  [0] << 24) + 
+              ((uint) sec_header.s_size  [1] << 16) +
+              ((uint) sec_header.s_size  [2] << 8) + 
+              ((uint) sec_header.s_size  [3]);
     
-  s_scnptr  = ((ulong) sec_header.s_scnptr [0] << 24) + 
-              ((ulong) sec_header.s_scnptr [1] << 16) +
-              ((ulong) sec_header.s_scnptr [2] << 8) + 
-              ((ulong) sec_header.s_scnptr [3]);
+  s_scnptr  = ((uint) sec_header.s_scnptr [0] << 24) + 
+              ((uint) sec_header.s_scnptr [1] << 16) +
+              ((uint) sec_header.s_scnptr [2] << 8) + 
+              ((uint) sec_header.s_scnptr [3]);
     
-  s_relptr  = ((ulong) sec_header.s_relptr [0] << 24) + 
-              ((ulong) sec_header.s_relptr [1] << 16) +
-              ((ulong) sec_header.s_relptr [2] << 8) + 
-              ((ulong) sec_header.s_relptr [3]);
+  s_relptr  = ((uint) sec_header.s_relptr [0] << 24) + 
+              ((uint) sec_header.s_relptr [1] << 16) +
+              ((uint) sec_header.s_relptr [2] << 8) + 
+              ((uint) sec_header.s_relptr [3]);
     
   s_nreloc  = ((ushort) sec_header.s_nreloc [0] << 8) +
                (ushort) sec_header.s_nreloc [1];
   s_nlnno   = ((ushort) sec_header.s_nlnno  [0] << 8) +
                (ushort) sec_header.s_nlnno  [1];
 
-  s_lnnoptr = ((ulong) sec_header.s_lnnoptr [0] << 24) + 
-              ((ulong) sec_header.s_lnnoptr [1] << 16) +
-              ((ulong) sec_header.s_lnnoptr [2] << 8) + 
-              ((ulong) sec_header.s_lnnoptr [3]);
+  s_lnnoptr = ((uint) sec_header.s_lnnoptr [0] << 24) + 
+              ((uint) sec_header.s_lnnoptr [1] << 16) +
+              ((uint) sec_header.s_lnnoptr [2] << 8) + 
+              ((uint) sec_header.s_lnnoptr [3]);
     
-  s_flags   = ((ulong) sec_header.s_flags [0] << 24) + 
-              ((ulong) sec_header.s_flags [1] << 16) +
-              ((ulong) sec_header.s_flags [2] << 8) + 
-              ((ulong) sec_header.s_flags [3]);
+  s_flags   = ((uint) sec_header.s_flags [0] << 24) + 
+              ((uint) sec_header.s_flags [1] << 16) +
+              ((uint) sec_header.s_flags [2] << 8) + 
+              ((uint) sec_header.s_flags [3]);
 }
 
     
@@ -550,15 +550,15 @@ dump_sec_header (int sec)
 {
   printf ("----Section-%d-header----------------------------------------\n", sec);
   printf ("Section name             = %s\n", s_name);
-  printf ("Physical address         = %08lX\n", s_paddr);    
-  printf ("Virtual address          = %08lX\n", s_vaddr);    
-  printf ("Section size             = %08lX (%ld)\n", s_size, s_size);     
+  printf ("Physical address         = %08X\n", s_paddr);    
+  printf ("Virtual address          = %08X\n", s_vaddr);    
+  printf ("Section size             = %08X (%d)\n", s_size, s_size);     
 }
 
 static void
 summarize_sec_header (int sec)
 {
-  printf ("%08lX %05lX (%ld) %s\n", s_paddr >> 1, s_size >> 1, s_size >> 1, s_name);
+  printf ("%08X %05X (%d) %s\n", s_paddr >> 1, s_size >> 1, s_size >> 1, s_name);
 }
 
 void
@@ -629,20 +629,20 @@ get_se (struct internal_syment *ise)
   for (i = 0; i < E_SYMNMLEN; i++)
     ise->e_name [i] = se.e.e_name [i];
 
-  ise->e.e_zeroes  = ((ulong) se.e.e.e_zeroes [0] << 24) + 
-                     ((ulong) se.e.e.e_zeroes [1] << 16) +
-                     ((ulong) se.e.e.e_zeroes [2] << 8) + 
-                     ((ulong) se.e.e.e_zeroes [3]);
+  ise->e.e_zeroes  = ((uint) se.e.e.e_zeroes [0] << 24) + 
+                     ((uint) se.e.e.e_zeroes [1] << 16) +
+                     ((uint) se.e.e.e_zeroes [2] << 8) + 
+                     ((uint) se.e.e.e_zeroes [3]);
 
-  ise->e.e_offset  = ((ulong) se.e.e.e_offset [0] << 24) + 
-                     ((ulong) se.e.e.e_offset [1] << 16) +
-                     ((ulong) se.e.e.e_offset [2] << 8) + 
-                     ((ulong) se.e.e.e_offset [3]);
+  ise->e.e_offset  = ((uint) se.e.e.e_offset [0] << 24) + 
+                     ((uint) se.e.e.e_offset [1] << 16) +
+                     ((uint) se.e.e.e_offset [2] << 8) + 
+                     ((uint) se.e.e.e_offset [3]);
 
-  ise->e_value     = ((ulong) se.e_value  [0] << 24) + 
-                     ((ulong) se.e_value  [1] << 16) +
-                     ((ulong) se.e_value  [2] << 8) + 
-                     ((ulong) se.e_value  [3]);
+  ise->e_value     = ((uint) se.e_value  [0] << 24) + 
+                     ((uint) se.e_value  [1] << 16) +
+                     ((uint) se.e_value  [2] << 8) + 
+                     ((uint) se.e_value  [3]);
 
   ise->e_scnum   = ((ushort) se.e_scnum  [0] << 8) +
                     (ushort) se.e_scnum  [1];
@@ -726,12 +726,12 @@ print_se (struct internal_syment *se)
     case T_MOE:    printf ("member  "); break;
     case T_UCHAR:  printf ("uchar   "); break;
     case T_USHORT: printf ("ushort  "); break;
-    case T_ULONG:  printf ("ulong   "); break;
+    case T_ULONG:  printf ("uint   "); break;
     default:       printf ("%6d  ", se->e_type); break;
     }
  
   /* print the value */
-  printf ("%08lX  ", se->e_value >> 1);
+  printf ("%08X  ", se->e_value >> 1);
 
   if (ISPTR (se->e_type))
     printf ("*");
@@ -782,7 +782,7 @@ process_file (FILE* input_file)
    * Read the file header and any sections
    */
   int sec;
-  long offset;  /* offset in file */
+  int offset;  /* offset in file */
 
   if (fread (&file_header, sizeof(struct filehdr), 1, input_file) != 1) {
     return error ("canot read file header");
@@ -803,7 +803,7 @@ process_file (FILE* input_file)
       offset += f_opthdr;
 
       if (verbose)
-        printf ("Entry point = 0x%08lX\n", entry >> 1);
+        printf ("Entry point = 0x%08X\n", entry >> 1);
       simreg.ic = entry >> 1;
     }
 
@@ -835,7 +835,7 @@ process_file (FILE* input_file)
 	{
 	  unsigned char *raw_data = (unsigned char *)malloc (s_size);
 	  int j;
-	  long address = s_paddr >> 1;
+	  int address = s_paddr >> 1;
 
 	  fseek (input_file, s_scnptr, 0);
 	  fread (raw_data, s_size, 1, input_file);
@@ -922,7 +922,7 @@ si_lcf (int argc, char *argv[])
 }
 
 
-long
+int
 find_coff_address (char *id)
 {
   /* Given a symbol id, search the symbol table for an

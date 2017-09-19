@@ -5,10 +5,8 @@
 /* Component :           utils.c -- general purpose utilities              */
 /*                                                                         */
 /* Copyright :          (C) Daimler-Benz Aerospace AG, 1994-1997           */
-/*                                                                         */
-/* Author    :     Oliver M. Kellogg, Dept. RST13, Dasa/Space Systems,     */
-/*                     P.O.Box 801169, D-81663 Munich, Germany.            */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                          (C) 2017 Oliver M. Kellogg                     */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -90,20 +88,7 @@ xtoi (char c)			/* This could be a macro, but we want to avoid side effects */
 }
 
 
-#ifndef STRDUP
-char *
-strdup (char *str)
-{
-  char *p;
-  if (str == NULL)
-    return NULL;
-  if ((p = (char *) malloc (strlen (str) + 1)) == NULL)
-    problem ("dynamic memory exhausted");
-  return strcpy (p, str);
-}
-#endif
-
-
+#ifndef STRNDUP
 char *
 strndup (char *str, int len)
 {
@@ -115,6 +100,7 @@ strndup (char *str, int len)
   *(p + len) = '\0';
   return strncpy (p, str, len);
 }
+#endif
 
 
 #ifndef STRNCASECMP
@@ -247,45 +233,45 @@ skip_symbol (char *s)
 }
 
 
-long
+int
 get_16bit_hexnum (char *s)	/* Convert four-digit hex string to number */
-{				/* Returns -1L on error, else a number in the range 0 .. 0xFFFF */
+{				/* Returns -1 on error, else a number in the range 0 .. 0xFFFF */
   int i;
-  ulong hexdigit;
-  long out = 0;
+  uint hexdigit;
+  int out = 0;
 
   for (i = 0; i < 4; i++)
     {
-      if ((hexdigit = (ulong) xtoi (*(s + i))) == -1)
-	return -1L;
-      out |= (long) hexdigit << (12 - (4 * i));
+      if ((hexdigit = (uint) xtoi (*(s + i))) == -1)
+	return -1;
+      out |= (int) hexdigit << (12 - (4 * i));
     }
   return out;
 }
 
 
-long
+int
 get_nibbles (char *src, int n_nibbles)
   /* Convert n-digit (1 <= n <= 8) hex string to number. */
-  /* Returns -1L on error, else a number in the range 0 .. 0x7FFFFFFF. */
+  /* Returns -1 on error, else a number in the range 0 .. 0x7FFFFFFF. */
   /* Of course, this means that for (n = 8), the most significant bit
      (sign bit) can not be used, so the maximum readable bitwidth is 31. */
 {
   int i;
-  long outnum = 0;
+  int outnum = 0;
 
   while (n_nibbles-- > 0)
     {
       if ((i = xtoi (*src++)) == -1)
-	return -1L;
-      outnum = (outnum << 4) | (long) i;
+	return -1;
+      outnum = (outnum << 4) | (int) i;
     }
   return outnum;
 }
 
 
 void
-put_nibbles (char *dst, ulong src, int n_nibbles)
+put_nibbles (char *dst, uint src, int n_nibbles)
 {
   int nibble;
 

@@ -5,10 +5,8 @@
 /* Component :       tldldm.c -- TLD Load Module loading functions         */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -53,12 +51,12 @@ static int linecnt;
 static int
 rotl16 (int num, int n_shifts)	/* Rotate-left a 16 bit word */
 {
-  ulong buf;
+  uint buf;
 
   if (n_shifts < 0 || n_shifts > 15)
     return error ("ldm: rotl16 called with illegal n_shifts");
-  buf = ((ulong) num & 0xFFFFL) << n_shifts;
-  buf = (buf & 0xFFFFL) | (buf >> 16);
+  buf = ((uint) num & 0xFFFF) << n_shifts;
+  buf = (buf & 0xFFFF) | (buf >> 16);
   return (int) buf;
 }
 
@@ -117,8 +115,8 @@ check_ldmline (char *line)
   if (address_field_used)
     {
       int addr_hinibble = xtoi (line[ADDRESS]);
-      long addr16 = get_word (line + ADDRESS + 1);
-      if (addr16 == -1L)
+      int addr16 = get_word (line + ADDRESS + 1);
+      if (addr16 == -1)
 	return error ("ldm: illegal char in address field");
       code ^= (int) addr16;
       if (addr_hinibble == -1)
@@ -130,8 +128,8 @@ check_ldmline (char *line)
     return error ("ldm: illegal character in data count");
   for (i = 0; i < datacnt; i++)
     {
-      long dataword = get_word (line + DATASTART + (4 * i));
-      if (dataword == -1L)
+      int dataword = get_word (line + DATASTART + (4 * i));
+      if (dataword == -1)
 	return error ("ldm: illegal char in data word");
       code = rotl16 (code, 1) ^ (int) dataword;
     }
@@ -145,14 +143,14 @@ static int
 load_tldline (char *line)
 {
   int cmd, actual_chksum, datacnt;
-  long claimed_chksum, address;
+  int claimed_chksum, address;
 
   if (line[0] != '/')
     return error ("LDM: illegal format at line %d", linecnt);
   cmd = line[COMMAND];
   if (cmd == ';' || cmd == 'E' || cmd == 'H' || cmd == 'Z')
     return OKAY;
-  if ((claimed_chksum = get_word (line + CHECKSUM)) == -1L)
+  if ((claimed_chksum = get_word (line + CHECKSUM)) == -1)
     return error ("numeric syntax error in checksum at LDM line %d",
 		  linecnt);
   actual_chksum = check_ldmline (line);
@@ -175,16 +173,16 @@ load_tldline (char *line)
 	if ((logaddr_hinibble = xtoi (line[ADDRESS + 1])) == -1)
 	  return error ("line %d: /%c error in logical address MS-nibble",
 			linecnt, cmd);
-	if ((address = get_nibbles (line + ADDRESS + 2, 3)) == -1L)
+	if ((address = get_nibbles (line + ADDRESS + 2, 3)) == -1)
 	  return error ("line %d: /%c error in logical address",
 			linecnt, cmd);
-	address |= (long) pagereg[bank][as][logaddr_hinibble].ppa << 12;
+	address |= (int) pagereg[bank][as][logaddr_hinibble].ppa << 12;
 	if ((datacnt = xtoi (line[COUNT])) == -1)
 	  return error ("line %d: /%c error in data count", linecnt, cmd);
 	for (i = 0; i < datacnt; i++)
 	  {
-	    long word = get_word (line + DATASTART + (4 * i));
-	    if (word == -1L)
+	    int word = get_word (line + DATASTART + (4 * i));
+	    if (word == -1)
 	      return error ("line %d: /%c data error", linecnt, cmd);
 	    poke (address++, (ushort) word);
 	  }
@@ -204,14 +202,14 @@ load_tldline (char *line)
 	for (i = 0; i < datacnt; i++)
 	  {
 	    const int allocation_type = xtoi (line[DATASTART + (4 * i)]);
-	    long pagereg_contents;
+	    int pagereg_contents;
 	    if (allocation_type == -1)
 	      return error ("line %d: /L error in allocation type", linecnt);
 	    if (allocation_type != 2)
 	      return error ("line %d: /L allocation type %d unimplemented",
 			    linecnt, allocation_type);
 	    pagereg_contents = get_nibbles (line + DATASTART + (4 * i) + 1, 3);
-	    if (pagereg_contents == -1L || pagereg_contents > 0xFFL)
+	    if (pagereg_contents == -1 || pagereg_contents > 0xFF)
 	      return error ("line %d: /L pagereg contents error", linecnt);
 	    pagereg[bank][as][pagereg_number].ppa = (ushort) pagereg_contents;
 	    if (++pagereg_number > 0xF)
@@ -224,15 +222,15 @@ load_tldline (char *line)
 	int i, physaddr_hinibble;
 	if ((physaddr_hinibble = xtoi (line[ADDRESS])) == -1)
 	  return error ("line %d: /M error in load address high nibble", linecnt);
-	if ((address = get_word (line + ADDRESS + 1)) == -1L)
+	if ((address = get_word (line + ADDRESS + 1)) == -1)
 	  return error ("line %d: /M error in load address", linecnt);
 	address |= physaddr_hinibble << 16;
 	if ((datacnt = xtoi (line[COUNT])) == -1)
 	  return error ("line %d: /M error in data count", linecnt);
 	for (i = 0; i < datacnt; i++)
 	  {
-	    long word = get_word (line + DATASTART + (4 * i));
-	    if (word == -1L)
+	    int word = get_word (line + DATASTART + (4 * i));
+	    if (word == -1)
 	      return error ("line %d: /M data error", linecnt);
 	    poke (address++, (ushort) word);
 	  }
@@ -242,9 +240,9 @@ load_tldline (char *line)
     case 'Q':
       {
 	int i, bank = (cmd == 'N') ? CODE : DATA;
-	if ((address = get_nibbles (line + ADDRESS, 5)) < 0L)
+	if ((address = get_nibbles (line + ADDRESS, 5)) < 0)
 	  return error ("line %d: /%c data error in address field", linecnt, cmd);
-	if (address > 0xFFL)
+	if (address > 0xFF)
 	  return error ("line %d: /%c starting pagereg number too large",
 			linecnt, cmd);
 	if ((datacnt = xtoi (line[COUNT])) == -1)
@@ -254,8 +252,8 @@ load_tldline (char *line)
 	    const int as = (int) address >> 4;
 	    const int pagenum = (int) address & 0xF;
 	    ushort *entire_pagereg = (ushort *) & pagereg[bank][as][pagenum];
-	    long word = get_word (line + DATASTART + (4 * i));
-	    if (word == -1L)
+	    int word = get_word (line + DATASTART + (4 * i));
+	    if (word == -1)
 	      return error ("line %d: /%c data error", linecnt, cmd);
 	    *entire_pagereg = (ushort) word;
 	    address++;
@@ -263,10 +261,10 @@ load_tldline (char *line)
       }
       break;
     case 'T':
-      if ((address = get_nibbles (line + ADDRESS, 5)) == -1L)
+      if ((address = get_nibbles (line + ADDRESS, 5)) == -1)
 	return error ("LDM: numeric syntax error in transfer address");
       simreg.ic = (ushort) address;
-      if (address > 0xFFFFL)
+      if (address > 0xFFFF)
 	return error ("LDM: cannot handle transfer address (too high)");
       break;
     default:

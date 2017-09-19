@@ -5,10 +5,8 @@
 /* Component :         cpu.c -- Central Processing Unit engine             */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :           oliver.kellogg@space.otn.dasa.de                  */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -51,7 +49,7 @@
 /* Exports */
 
 int   execute (void);
-ulong instcnt;		     /* Total number of instructions executed */
+uint instcnt;		     /* Total number of instructions executed */
 struct regs simreg;	     /* The 1750 register file */
 int   bpindex = -1;	     /* Index of breakpoint when hitting one */
 			     /* (unused in BSVC) */
@@ -120,7 +118,7 @@ init_cpu (void)
   /* Write zeros to 1750 regs */
   memset ((void *) &simreg, 0, sizeof (struct regs));
   /* Reset counter of total instructions executed */
-  instcnt = 0L;
+  instcnt = 0;
   /* Reset counter of total simulation time */
   total_time_in_us = 0.0;
 }
@@ -252,7 +250,7 @@ static int
 get_word (int bank, ushort address, short *data)
 {
   ushort al, ak = (simreg.sw >> 4) & 0xF, as = simreg.sw & 0xF;
-  ulong phys_address;
+  uint phys_address;
 
   if (bank != CODE && bank != DATA)
     {
@@ -300,7 +298,7 @@ static int
 store_word (int bank, ushort address, ushort data)
 {
   ushort al, ak = (simreg.sw >> 4) & 0xF, as = simreg.sw & 0xF;
-  ulong phys_address;
+  uint phys_address;
 
   if (bank != CODE && bank != DATA)
     {
@@ -1412,8 +1410,8 @@ static int
 ex_dsll ()		/* 65xy */
 {
   int n_shifts = (int) upper + 1;
-  ulong buf = ((ulong) simreg.r[lower] << 16)
-  | ((ulong) simreg.r[lower + 1] & 0xFFFF);
+  uint buf = ((uint) simreg.r[lower] << 16)
+  | ((uint) simreg.r[lower + 1] & 0xFFFF);
 
   buf <<= n_shifts;
   simreg.r[lower] = (short) (buf >> 16);
@@ -1428,8 +1426,8 @@ static int
 ex_dsrl ()		/* 66xy */
 {
   int n_shifts = (int) upper + 1;
-  ulong buf = ((ulong) simreg.r[lower] << 16)
-  | ((ulong) simreg.r[lower + 1] & 0xFFFF);
+  uint buf = ((uint) simreg.r[lower] << 16)
+  | ((uint) simreg.r[lower + 1] & 0xFFFF);
 
   buf >>= n_shifts;                       /* Attention: buf is unsigned, */
   simreg.r[lower] = (short) (buf >> 16);   /* i.e. *logical* shift right */
@@ -1444,8 +1442,8 @@ static int
 ex_dsra ()		/* 67xy */
 {
   int n_shifts = (int) upper + 1;
-  long buf = ((long) simreg.r[lower] << 16)
-  | ((long) simreg.r[lower + 1] & 0xFFFF);
+  int buf = ((int) simreg.r[lower] << 16)
+          | ((int) simreg.r[lower + 1] & 0xFFFF);
 
   buf >>= n_shifts;
   simreg.r[lower] = (short) (buf >> 16);
@@ -1460,8 +1458,8 @@ static int
 ex_dslc ()		/* 68xy */
 {
   int n_shifts = (int) upper + 1;
-  ulong buf = ((ulong) simreg.r[lower] << 16)  /* This variable is needed to */
-  | ((ulong) simreg.r[lower + 1] & 0xFFFF);   /* get a `logical shift right' */
+  uint buf = ((uint) simreg.r[lower] << 16)  /* This variable is needed to */
+  | ((uint) simreg.r[lower + 1] & 0xFFFF);   /* get a `logical shift right' */
 
   buf = (buf << n_shifts) | (buf >> (32 - n_shifts));
   simreg.r[lower] = (short) (buf >> 16);
@@ -1574,8 +1572,8 @@ ex_dslr ()		/* 6Dxy */
 {
   short shc = simreg.r[lower];
   int n_shifts = (int) shc;
-  ulong buf = ((ulong) simreg.r[upper] << 16)   /* This variable is needed */
-  | ((ulong) simreg.r[upper + 1] & 0xFFFF);     /* to get a LOGICAL shift */
+  uint buf = ((uint) simreg.r[upper] << 16)   /* This variable is needed */
+  | ((uint) simreg.r[upper + 1] & 0xFFFF);     /* to get a LOGICAL shift */
 
   if (shc < 0)                  /* negative => shift right */
     {
@@ -1605,8 +1603,8 @@ ex_dsar ()		/* 6Exy */
 {
   short shc = simreg.r[lower];
   int n_shifts = (int) shc;
-  long buf = ((long) simreg.r[upper] << 16)
-	   | ((long) simreg.r[upper + 1] & 0xFFFFL);
+  int buf = ((int) simreg.r[upper] << 16)
+	  | ((int) simreg.r[upper + 1] & 0xFFFF);
 
   if (shc < 0)                  /* negative => shift right */
     {
@@ -1614,10 +1612,10 @@ ex_dsar ()		/* 6Exy */
 	simreg.pir |= INTR_FIXOFL;
       else if (shc == 32)
 	{
-	 if (buf < 0L)
-	   buf = 0xFFFFFFFFL;
+	 if (buf < 0)
+	   buf = 0xFFFFFFFF;
 	 else
-	   buf = 0L;
+	   buf = 0;
 	}
       else
         buf >>= shc;
@@ -1627,7 +1625,7 @@ ex_dsar ()		/* 6Exy */
       if (shc > 32)
 	simreg.pir |= INTR_FIXOFL;
       else if (shc == 32)
-	buf = 0L;
+	buf = 0;
       else
 	buf <<= shc;
     }
@@ -1645,8 +1643,8 @@ ex_dscr ()		/* 6Fxy */
 {
   short shc = simreg.r[lower];
   int n_shifts = (int) shc;
-  ulong buf = ((ulong) simreg.r[upper] << 16)   /* This variable is needed */
-  | ((ulong) simreg.r[upper + 1] & 0xFFFF);     /* to get a LOGICAL shift */
+  uint buf = ((uint) simreg.r[upper] << 16)   /* This variable is needed */
+  | ((uint) simreg.r[upper + 1] & 0xFFFF);     /* to get a LOGICAL shift */
 
   if (shc < 0)                  /* negative => rotate right */
     {
@@ -2640,11 +2638,11 @@ ex_abs ()		/* A4xy */
 static int
 ex_dabs ()		/* A5xy */
 {
-  long help = ((long) simreg.r[lower] << 16)
-	    | ((long) simreg.r[lower+1] & 0x0000FFFF);
+  int help = ((int) simreg.r[lower] << 16)
+	   | ((int) simreg.r[lower+1] & 0x0000FFFF);
   int negative = 0;  /* for stime.h cycle computation */
 
-  if (help == -0x80000000L)
+  if (help == -0x80000000)
     {
       simreg.r[upper] = -0x8000;
       simreg.r[upper + 1] = 0;
@@ -2772,10 +2770,10 @@ ex_fabs ()		/* ACxy */
 static int
 ex_uar ()		/* ADxy */
 {
-  ulong lhelp = (ulong) simreg.r[upper] + (ulong) simreg.r[lower];
+  uint lhelp = (uint) simreg.r[upper] + (uint) simreg.r[lower];
 
   simreg.r[upper] = (short) lhelp;
-  if (lhelp > 0xFFFFL)
+  if (lhelp > 0xFFFF)
     simreg.sw = (simreg.sw & 0x0FFF) | CS_CARRY;
   else
     update_cs (&simreg.r[upper], VAR_INT);
@@ -2789,15 +2787,15 @@ ex_ua ()		/* AExy */
 {
   ushort addr;
   short help;
-  ulong lhelp;  /* need it for some brain damaged C compilers */
+  uint lhelp;  /* need it for some brain damaged C compilers */
 
   GET (CODE, simreg.ic + 1, (short *) &addr);
   addr += CHK_RX ();
   GET (DATA, addr, &help);
 
-  lhelp = (ulong) simreg.r[upper] + (ulong) help;
+  lhelp = (uint) simreg.r[upper] + (uint) help;
   simreg.r[upper] = (short) lhelp;
-  if (lhelp > 0xFFFFL)
+  if (lhelp > 0xFFFF)
     simreg.sw = (simreg.sw & 0x0FFF) | CS_CARRY;
   else
     update_cs (&simreg.r[upper], VAR_INT);
@@ -2873,8 +2871,8 @@ ex_neg ()		/* B4xy */
 static int
 ex_dneg ()		/* B5xy */
 {
-  long help = ((long) simreg.r[lower] << 16)
-          | ((long) simreg.r[lower+1] & 0xFFFF);
+  int help = ((int) simreg.r[lower] << 16)
+           | ((int) simreg.r[lower+1] & 0xFFFF);
 
   help = -help;
   simreg.r[upper] = (short) (help >> 16);
@@ -2981,10 +2979,10 @@ ex_fneg ()		/* BCxy */
 static int
 ex_usr ()		/* BDxy */
 {
-  ulong lhelp = (ulong) simreg.r[upper] - (ulong) simreg.r[lower];
+  uint lhelp = (uint) simreg.r[upper] - (uint) simreg.r[lower];
 
   simreg.r[upper] = (short) lhelp;
-  if (lhelp > 0xFFFFL)
+  if (lhelp > 0xFFFF)
     simreg.sw = (simreg.sw & 0x0FFF) | CS_CARRY;
   else
     update_cs (&simreg.r[upper], VAR_INT);
@@ -2998,15 +2996,15 @@ ex_us ()		/* BExy */
 {
   ushort addr;
   short help;
-  ulong lhelp;
+  uint lhelp;
 
   GET (CODE, simreg.ic + 1, (short *) &addr);
   addr += CHK_RX ();
   GET (DATA, addr, &help);
 
-  lhelp = (ulong) simreg.r[upper] - (ulong) help;
+  lhelp = (uint) simreg.r[upper] - (uint) help;
   simreg.r[upper] = (short) lhelp;
-  if (lhelp > 0xFFFFL)
+  if (lhelp > 0xFFFF)
     simreg.sw = (simreg.sw & 0x0FFF) | CS_CARRY;
   else
     update_cs (&simreg.r[upper], VAR_INT);
@@ -3319,18 +3317,18 @@ static int
 ex_ste ()		/* DCxy */
 {
   ushort addr;
-  ulong laddr;
+  uint laddr;
 
   GET (CODE, simreg.ic + 1, (short *) &addr);
-  laddr = (ulong) addr;
+  laddr = (uint) addr;
 
   if (lower > 0)
     {
-      laddr += (ulong) simreg.r[lower];
-      laddr += (ulong) (simreg.r[lower-1] & 0x7F) << 16;
+      laddr += (uint) simreg.r[lower];
+      laddr += (uint) (simreg.r[lower-1] & 0x7F) << 16;
     }
   else
-    laddr += (ulong) simreg.r[15];
+    laddr += (uint) simreg.r[15];
 
   poke (simreg.r[upper], laddr);
 
@@ -3342,18 +3340,18 @@ static int
 ex_dste ()		/* DDxy */
 {
   ushort addr;
-  ulong laddr;
+  uint laddr;
 
   GET (CODE, simreg.ic + 1, (short *) &addr);
-  laddr = (ulong) addr;
+  laddr = (uint) addr;
 
   if (lower > 0)
     {
-      laddr += (ulong) simreg.r[lower];
-      laddr += (ulong) (simreg.r[lower-1] & 0x7F) << 16;
+      laddr += (uint) simreg.r[lower];
+      laddr += (uint) (simreg.r[lower-1] & 0x7F) << 16;
     }
   else
-    laddr += (ulong) simreg.r[15];
+    laddr += (uint) simreg.r[15];
 
   poke (simreg.r[upper], laddr);
   poke (simreg.r[upper+1], laddr + 1);
@@ -3366,18 +3364,18 @@ static int
 ex_le ()		/* DExy */
 {
   ushort addr;
-  ulong laddr;
+  uint laddr;
 
   GET (CODE, simreg.ic + 1, (short *) &addr);
-  laddr = (ulong) addr;
+  laddr = (uint) addr;
 
   if (lower > 0)
     {
-      laddr += (ulong) simreg.r[lower];
-      laddr += (ulong) (simreg.r[lower-1] & 0x7F) << 16;
+      laddr += (uint) simreg.r[lower];
+      laddr += (uint) (simreg.r[lower-1] & 0x7F) << 16;
     }
   else
-    laddr += (ulong) simreg.r[15];
+    laddr += (uint) simreg.r[15];
 
   if (peek (laddr, (ushort *) &simreg.r[upper]) == 0)
     error ("read error at ic = %04hX\n", simreg.ic);
@@ -3391,18 +3389,18 @@ static int
 ex_dle ()		/* DFxy */
 {
   ushort addr;
-  ulong laddr;
+  uint laddr;
 
   GET (CODE, simreg.ic + 1, (short *) &addr);
-  laddr = (ulong) addr;
+  laddr = (uint) addr;
 
   if (lower > 0)
     {
-      laddr += (ulong) simreg.r[lower];
-      laddr += (ulong) (simreg.r[lower-1] & 0x7F) << 16;
+      laddr += (uint) simreg.r[lower];
+      laddr += (uint) (simreg.r[lower-1] & 0x7F) << 16;
     }
   else
-    laddr += (ulong) simreg.r[15];
+    laddr += (uint) simreg.r[15];
 
   if (peek (laddr, (ushort *) &simreg.r[upper]) == 0)
     error ("read error at ic = %04hX\n", simreg.ic);
@@ -3525,7 +3523,7 @@ ex_nr ()		/* E7xy */
 static int
 ex_fix ()		/* E8xy */
 {
-  long help = (long) from_1750flt (&simreg.r[lower]);
+  int help = (int) from_1750flt (&simreg.r[lower]);
 
   /* To Be Clarified:
      The following behavior is what this operation SHOULD do, but
@@ -3556,13 +3554,13 @@ ex_flt ()		/* E9xy */
 static int
 ex_efix ()		/* EAxy */
 {
-  long help;
+  int help;
   /* This time, we do exactly as the F9450 manual prescribes! */
   if ((char) (simreg.r[lower + 1] & 0xFF) > 0x1F)
     simreg.pir |= INTR_FIXOFL;
   else
     {
-      help = (long) from_1750eflt (&simreg.r[lower]);
+      help = (int) from_1750eflt (&simreg.r[lower]);
       simreg.r[upper] = (short) (help >> 16);
       simreg.r[upper + 1] = (short) (help & 0xFFFF);
     }
@@ -3575,8 +3573,8 @@ ex_efix ()		/* EAxy */
 static int
 ex_eflt ()		/* EBxy */
 {
-  long help = ((long) simreg.r[lower] << 16)
-	    | ((long) simreg.r[lower+1] & 0xFFFFL);
+  int help = ((int) simreg.r[lower] << 16)
+	   | ((int) simreg.r[lower+1] & 0xFFFF);
 
   to_1750eflt ((double) help, &simreg.r[upper]);
   update_cs (&simreg.r[upper], VAR_DOUBLE);

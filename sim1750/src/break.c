@@ -5,10 +5,8 @@
 /* Component :        break.c -- breakpoint handling functions             */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -50,7 +48,7 @@
 static struct
   {
     breaktype type;
-    ulong addr;
+    uint addr;
     char *label;
     bool is_active;
   } breakpt[MAX_BREAK];	/* breakpoint array */
@@ -61,7 +59,7 @@ int n_breakpts = 0;	/* breakpoint counter */
 /* Return breakpoint index if breakpoint found for given
    type/bank/address_state/logical_address, or -1 if no breakpoint found. */
 int
-find_breakpt (breaktype type, ulong phys_address)
+find_breakpt (breaktype type, uint phys_address)
 {
   int i = n_breakpts;
 
@@ -94,7 +92,7 @@ set_active (int bp_index)
 int
 si_brkset (int argc, char *argv[])
 {
-  ulong address;
+  uint address;
   breaktype type = READ_WRITE;
 
   if (argc <= 1)
@@ -105,10 +103,10 @@ si_brkset (int argc, char *argv[])
     {
       if (isalpha (*argv[1]) || *argv[1] == '_')
         {
-          long addr = find_address (argv[1]);
-          if (addr < 0L)
+          int addr = find_address (argv[1]);
+          if (addr < 0)
             return error ("label name not found");
-          address = (ulong) addr;
+          address = (uint) addr;
         }
       else
         return error ("invalid address syntax");
@@ -158,7 +156,7 @@ int
 si_brkclear (int argc, char *argv[])
 {
   int i;
-  ulong addr;
+  uint addr;
 
   if (argc <= 1)
     return error ("address argument missing");
@@ -204,7 +202,7 @@ si_brksave (int argc, char *argv[])
 	{
 	  fprintf (savefile, "#\t\tsaved BREAKPOINT LIST\n");
 	  for (i = 0; i < n_breakpts; i++)
-	    fprintf (savefile, "br  %05lX  %s\n",
+	    fprintf (savefile, "br  %05X  %s\n",
 		     breakpt[i].addr, typestr[breakpt[i].type]);
 	}
     }

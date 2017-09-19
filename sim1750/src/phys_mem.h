@@ -6,10 +6,10 @@
 #include "type.h"
 
 extern void   init_mem ();
-extern bool   was_written (ulong phys_address);
+extern bool   was_written (uint phys_address);
 /* simulation memory allocator */
-extern void  *xalloc (ulong number, ulong size);
-extern ulong allocated;  /* total amount allocated by xalloc() */
+extern void  *xalloc (uint number, uint size);
+extern uint allocated;  /* total amount allocated by xalloc() */
 
 /* mem.word[] contains the simulation's allocated memory pages.
    The mem.was_written[] array has one bit for each address within a page.
@@ -20,7 +20,7 @@ extern ulong allocated;  /* total amount allocated by xalloc() */
 typedef struct
   {
     ushort word[4096];
-    ulong  was_written[128];  /* bit-packed, one bit per address */
+    uint  was_written[128];  /* bit-packed, one bit per address */
   } mem_t;
 
 #define N_PAGES   256  /* 1 Mword address space */

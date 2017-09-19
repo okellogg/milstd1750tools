@@ -5,10 +5,8 @@
 /* Component :   flt1750.c -- host independent float conversion routines   */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :           oliver.kellogg@space.otn.dasa.de                  */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -40,7 +38,7 @@
 #define pow2(exp)  pow(2.0,(double)exp)
 
 #define ushort unsigned short
-#define ulong  unsigned long
+#define uint   unsigned int
 
 #define FLOATING_TWO_TO_THE_FIFTEEN            32768.0
 #define FLOATING_TWO_TO_THE_TWENTYTHREE      8388608.0
@@ -52,12 +50,12 @@
 double
 from_1750flt (short *input)	/* input : array of 2 shorts */
 {
-  long int_mant;
+  int int_mant;
   double flt_mant, flt_exp;
   signed char int_exp;
 
   int_exp = (signed char) (input[1] & 0xFF);
-  int_mant = ((long) input[0] << 8) | (((long) input[1] & 0xFF00L) >> 8);
+  int_mant = ((int) input[0] << 8) | (((int) input[1] & 0xFF00) >> 8);
   /* printf("int_mant = 0x%08lx\n",int_mant); */
   flt_mant = (double) int_mant / FLOATING_TWO_TO_THE_TWENTYTHREE;
   flt_exp = pow2 (int_exp);
@@ -68,7 +66,7 @@ int
 to_1750flt (double input, short output[2])
 {
   int exp;
-  long mant;
+  int mant;
 
   input = dfrexp (input, &exp);
 
@@ -83,7 +81,7 @@ to_1750flt (double input, short output[2])
       exp--;
     }
 
-  mant = (long) (input * FLOATING_TWO_TO_THE_THIRTYONE);
+  mant = (int) (input * FLOATING_TWO_TO_THE_THIRTYONE);
 
   /* printf("\n\tmant=%08lx\n",mant); */
   output[0] = (short) (mant >> 16);
@@ -95,14 +93,14 @@ to_1750flt (double input, short output[2])
 double
 from_1750eflt (short *input)	/* input : array of 3 shorts */
 {
-  long int_mant_hi, int_mant_lo;
+  int int_mant_hi, int_mant_lo;
   double flt_mant, flt_exp;
   signed char int_exp;
 
   int_exp = (signed char) (input[1] & 0xFF);
 
-  int_mant_hi = (((long) input[0] << 16) | ((long) input[1] & 0xFF00L)) >> 8;
-  int_mant_lo = ((long) input[2] & 0xFFFFL);
+  int_mant_hi = (((int) input[0] << 16) | ((int) input[1] & 0xFF00)) >> 8;
+  int_mant_lo = ((int) input[2] & 0xFFFF);
 
   flt_mant = (double) int_mant_hi / FLOATING_TWO_TO_THE_TWENTYTHREE
     + (double) int_mant_lo / FLOATING_TWO_TO_THE_THIRTYNINE;

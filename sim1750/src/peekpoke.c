@@ -5,10 +5,8 @@
 /* Component :        peekpoke.c -- low-level access to memory             */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -39,12 +37,12 @@
 /* peek() returns FALSE on reading an uninitialized location. */
 
 bool
-peek (ulong phys_address, ushort *value)
+peek (uint phys_address, ushort *value)
 {
   unsigned page     = (unsigned) (phys_address >> 12);
   unsigned log_addr = (unsigned) (phys_address & 0x0FFF);
   mem_t *memptr;
-  ulong was_written;
+  uint was_written;
 
   if (page > 0xFF)
     problem ("peek: absolute memory address too large");
@@ -56,13 +54,13 @@ peek (ulong phys_address, ushort *value)
 	problem ("peek: memory allocation request refused by OS\n");
     }
   *value = memptr->word[log_addr];
-  was_written = memptr->was_written[log_addr / 32] & (1L << (log_addr % 32));
+  was_written = memptr->was_written[log_addr / 32] & (1 << (log_addr % 32));
   return was_written != 0;
 }
 
 
 void
-poke (ulong phys_address, ushort value)
+poke (uint phys_address, ushort value)
 {
   unsigned page = (unsigned) (phys_address >> 12);
   unsigned log_addr = (unsigned) (phys_address & 0x0FFF);
@@ -78,7 +76,7 @@ poke (ulong phys_address, ushort value)
 	problem ("poke: dynamic memory exhausted");
     }
   memptr->word[log_addr] = value;
-  memptr->was_written[log_addr / 32] |= 1L << (log_addr % 32);
+  memptr->was_written[log_addr / 32] |= 1 << (log_addr % 32);
 }
 
 

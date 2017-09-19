@@ -7,7 +7,7 @@
 
 typedef enum { READ_WRITE, READ, WRITE } breaktype;
 
-extern int  find_breakpt (breaktype type, ulong phys_address);
+extern int  find_breakpt (breaktype type, uint phys_address);
 extern void set_inactive (int bp_index);
 extern void set_active   (int bp_index);
 

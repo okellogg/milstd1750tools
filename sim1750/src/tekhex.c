@@ -5,10 +5,8 @@
 /* Component :     tekhex.c -- Tektronix Extended Hex file generation      */
 /*                                                                         */
 /* Copyright :          (C) Daimler-Benz Aerospace AG, 1994-1997           */
-/*                                                                         */
-/* Author    :       Oliver M. Kellogg, Dornier Satellite Systems,         */
-/*                       Dept. RST13, D-81663 Munich, Germany.             */
-/* Contact   :             oliver.kellogg@space.otn.dasa.de                */
+/*                          (C) 2017 Oliver M. Kellogg                     */
+/* Contact   :             okellogg@users.sourceforge.net                  */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -88,7 +86,7 @@ check_tekline (char *line)
 static void
 put_xnum (char **p, ushort num)
 {
-  put_nibbles (*p, (ulong) num, 4);
+  put_nibbles (*p, (uint) num, 4);
   *p += 4;
 }
 
@@ -106,9 +104,9 @@ finish_tekline ()
   if (datalen > 0)		/* close line if still open */
     {
       /* linelength without '%' and '\n' */
-      put_nibbles (tekline + 1, (ulong) (linep - tekline - 1), 2);
+      put_nibbles (tekline + 1, (uint) (linep - tekline - 1), 2);
       strcpy (linep, "\n");
-      put_nibbles (tekline + 4, (ulong) check_tekline (tekline), 2);
+      put_nibbles (tekline + 4, (uint) check_tekline (tekline), 2);
       fputs (tekline, fp);
       linep = tekline + DATASTART;
       is_new_line = TRUE;
@@ -117,9 +115,9 @@ finish_tekline ()
 
 
 void
-emit_tekword (ulong startaddr, ushort word)
+emit_tekword (uint startaddr, ushort word)
 {
-  static ulong last_addr = 0xEFFFFFFF;	/* any impossible start value */
+  static uint last_addr = 0xEFFFFFFF;	/* any impossible start value */
   int n_words = (linep - (tekline + DATASTART)) / 4;
 
   if (startaddr != last_addr + 1 && n_words > 0)
@@ -228,12 +226,12 @@ create_tekfile (char *outfname)
 
 
 void
-close_tekfile (ulong transfer_address)
+close_tekfile (uint transfer_address)
 {
   finish_tekline ();
   /* Termination Block */
-  sprintf (tekline, "%%0B8xx5%05lX\n", transfer_address * 2);
-  put_nibbles (tekline + 4, (ulong) check_tekline (tekline), 2);
+  sprintf (tekline, "%%0B8xx5%05X\n", transfer_address * 2);
+  put_nibbles (tekline + 4, (uint) check_tekline (tekline), 2);
   fputs (tekline, fp);
   fclose (fp);
 }

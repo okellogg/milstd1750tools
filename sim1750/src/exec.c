@@ -5,10 +5,8 @@
 /* Component :         exec.c -- control over simulator execution          */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :           oliver.kellogg@space.otn.dasa.de                  */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -41,7 +39,7 @@
 /* Imports */
 
 extern void  dis_reg ();	/* cmd.c */
-extern int   sys_int (long);	/* cmd.c */
+extern int   sys_int (int);	/* cmd.c */
 extern char *disassemble ();	/* sdisasm.c */
 
 
@@ -85,7 +83,7 @@ si_go (int argc, char *argv[])
     execute_without_breakpt ();
   while (1)
     {
-      if (sys_int (1L))
+      if (sys_int (1))
 	return INTERRUPT;
       if (execute () == MEMERR)
 	break;
@@ -136,7 +134,7 @@ si_snglstp (int argc, char *argv[])
 	}
       while (simreg.ic != target_addr)
 	{
-	  if (sys_int (1L))
+	  if (sys_int (1))
 	    return (INTERRUPT);
 	  if (execute () == MEMERR)
 	    break;
@@ -159,7 +157,7 @@ si_snglstp (int argc, char *argv[])
     {
       while (count-- > 0)
 	{
-	  if (sys_int (1L))
+	  if (sys_int (1))
 	    return (INTERRUPT);
 	  if (at_bpt_instruction ())
 	    {
@@ -197,7 +195,7 @@ si_trace (int argc, char *argv[])
 
   while (count-- > 0)
     {
-      if (sys_int (1L))
+      if (sys_int (1))
 	return (INTERRUPT);
 
       if (at_bpt_instruction ())

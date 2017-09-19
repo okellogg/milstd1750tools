@@ -5,10 +5,8 @@
 /* Component :     phys_mem.c -- low-level implementation of memory        */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -37,7 +35,7 @@
 
 mem_t *mem[256];  /* 1 Mword address space */
 
-ulong allocated = 0;  /* statistic of total amount allocated by xalloc() */
+uint allocated = 0;  /* statistic of total amount allocated by xalloc() */
 
 void
 init_mem ()
@@ -55,18 +53,18 @@ init_mem ()
 
 
 bool
-was_written (ulong phys_address)
+was_written (uint phys_address)
 {
   unsigned page = (unsigned) (phys_address >> 12);
   unsigned address = (unsigned) (phys_address & 0x0FFF);
 
   if (mem[page] == MNULL)
     return 0;
-  return (mem[page]->was_written[address / 32] & (1L << (address % 32))) != 0;
+  return (mem[page]->was_written[address / 32] & (1 << (address % 32))) != 0;
 }
 
 
-void *xalloc (ulong number, ulong size)
+void *xalloc (uint number, uint size)
 {
   void *retval;
   if ((retval = calloc (number, size)) != (void *) 0)

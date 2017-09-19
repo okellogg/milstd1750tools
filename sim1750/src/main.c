@@ -5,10 +5,8 @@
 /* Component :            main.c -- simulator main program                 */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :           oliver.kellogg@space.otn.dasa.de                  */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */

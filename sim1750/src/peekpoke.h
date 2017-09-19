@@ -2,6 +2,6 @@
 
 #include "type.h"
 
-extern bool peek (ulong phys_address, ushort *value);
-extern void poke (ulong phys_address, ushort value);
+extern bool peek (uint phys_address, ushort *value);
+extern void poke (uint phys_address, ushort value);
 

@@ -5,10 +5,8 @@
 /* Component :               cmd.c -- Command Interpreter                  */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :           oliver.kellogg@space.otn.dasa.de                  */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -74,7 +72,7 @@ extern char *disassemble ();		  /* sdisasm.c */
 static const char *prompt = "command > ";
 
 static bool  batchbreak = TRUE;	/* breaking batch allowed                 */
-static long  int_count = 0;	/* number of interrupts from keyboard     */
+static int   int_count = 0;	/* number of interrupts from keyboard     */
 static char  logfilename[128];
 static int   leave = 0;			/* leave command interpreter */
 
@@ -373,9 +371,9 @@ interpreter (char *startup_batchfile)
         error ("could not open startup batchfile %s", startup_batchfile);
     }
 
-  f_argv[0] = (char *) calloc (1L, 128L);
+  f_argv[0] = (char *) calloc (1, 128);
   for (i = 1; i <= MAXCOMARGS; i++)
-    if ((f_argv[i] = (char *) calloc (1L, 64L)) == NULL)
+    if ((f_argv[i] = (char *) calloc (1, 64)) == NULL)
       problem ("interpreter: could not allocate cmd string space");
 
   while (1)
@@ -386,7 +384,7 @@ interpreter (char *startup_batchfile)
 	{
 	  if (int_count)
 	    {
-	      sys_int (0L);
+	      sys_int (0);
 	      lprintf ("\nInterrupt : %s >>> %s\n", f_argv[0], global_message);
 	    }
 	}
@@ -537,7 +535,7 @@ int_handler_install (mode)
    <Control-C>. That is useful when execution is in an endless loop.
  */
 int
-sys_int (long val)
+sys_int (int val)
 {
   int retval = 0;
 #ifdef __MSDOS__
@@ -557,7 +555,7 @@ sys_int (long val)
 	}
       int_count = 0;
       retval++;
-      sprintf (global_message, "%d Level(s) interrupted (%ld)", retval, val);
+      sprintf (global_message, "%d Level(s) interrupted (%d)", retval, val);
     }
 
   return (retval);
@@ -727,7 +725,7 @@ co_help (int argc, char *argv[])
 static int
 co_info (int argc, char *argv[])
 {
-  ulong addr = 0L, end_addr;
+  uint addr = 0, end_addr;
   int i;
   bool seen_start = FALSE;
 
@@ -745,10 +743,10 @@ co_info (int argc, char *argv[])
   lprintf ("\tBatch level:\t%d\n", actinfile);
   if (logfile != (FILE *) 0)
     lprintf ("\tLogfile:\t\t%s\n", logfilename);
-  lprintf ("\tAllocation:\t%ld words of simulation memory\n", allocated/2);
+  lprintf ("\tAllocation:\t%d words of simulation memory\n", allocated/2);
   lprintf ("\tOptimization in favor of (speed|features):\t%s\n",
 	   need_speed ? "Speed" : "Features");
-  lprintf ("\tInstruction Count:\t%ld\n", instcnt);
+  lprintf ("\tInstruction Count:\t%d\n", instcnt);
   lprintf ("\tExecution time (uSec):\t%0.3f\n", total_time_in_us);
   lprintf ("\tMemory regions used:\n");
   for (i = 0; i < N_PAGES; i++)
@@ -762,8 +760,8 @@ co_info (int argc, char *argv[])
 	    }
 	  continue;
 	}
-      addr = (ulong) i << 12;
-      end_addr = (((ulong) i + 1L) << 12) - 1L;
+      addr = (uint) i << 12;
+      end_addr = (((uint) i + 1) << 12) - 1;
       do
 	{
 	  if (was_written (addr))
@@ -878,7 +876,7 @@ co_war (int argc, char *argv[])
    Return OKAY for success or ERROR on invalid syntax of the input string.
  */
 bool
-parse_address (char *str, ulong *phys_address)
+parse_address (char *str, uint *phys_address)
 {
   char *i_o = strpbrk (str, "io");
   int  hexdigit;
@@ -899,7 +897,7 @@ parse_address (char *str, ulong *phys_address)
     {
       if ((hexdigit = xtoi (*str)) == -1)
 	return ERROR;
-      *phys_address = (*phys_address << 4) | (ulong) hexdigit;
+      *phys_address = (*phys_address << 4) | (uint) hexdigit;
       str++;
     }
   if (i_o != NULL)
@@ -915,7 +913,7 @@ si_disasm (int argc, char *argv[])
   int i, n_words;
   char *sym, disasm_text[100];
   ushort words[2];
-  static ulong address = 0L;
+  static uint address = 0;
   static int length = 1;
   bool verbose_save = verbose;
 
@@ -935,7 +933,7 @@ si_disasm (int argc, char *argv[])
   lprintf ("\n");
   for (i = 0; i < length; i++)
     {
-      if (sys_int (1L))
+      if (sys_int (1))
 	return (INTERRUPT);
       if ((sym = find_labelname (address)) != NULL)
 	lprintf ("                      %s\n", sym);
@@ -1018,7 +1016,7 @@ static int
 si_dispmem (int argc, char *argv[])
 {
   int i;
-  static ulong address = 0L;
+  static uint address = 0;
   static int length = 1;
   bool verbose_save = verbose;
 
@@ -1039,7 +1037,7 @@ si_dispmem (int argc, char *argv[])
   for (i = 0; i < length; i++, address++)
     {
       ushort value;
-      if (sys_int (1L))
+      if (sys_int (1))
 	return (INTERRUPT);
       if (i % DUMPLEN == 0)
 	lprintf ("%05lX    ", address);
@@ -1061,7 +1059,7 @@ si_dispflt (int argc, char *argv[])
 {
   int i;
   short fltwords[2];
-  static ulong address = 0L;
+  static uint address = 0;
   static int length = 1;
   bool verbose_save = verbose;
 
@@ -1091,7 +1089,7 @@ si_dispflt (int argc, char *argv[])
   for (i = 0; i < length; i++, address += 2)
     {
       bool word0_was_written, word1_was_written;
-      if (sys_int (1L))
+      if (sys_int (1))
 	return (INTERRUPT);
       lprintf ("%05lX    ", address);
       word0_was_written = peek (address, (ushort *) &fltwords[0]);
@@ -1112,7 +1110,7 @@ si_dispeflt (int argc, char *argv[])
 {
   int i;
   short fltwords[3];
-  static ulong address = 0L;
+  static uint address = 0;
   static int length = 1;
   bool verbose_save = verbose;
 
@@ -1133,7 +1131,7 @@ si_dispeflt (int argc, char *argv[])
   for (i = 0; i < length; i++, address += 3)
     {
       bool word0_was_written, word1_was_written, word2_was_written;
-      if (sys_int (1L))
+      if (sys_int (1))
 	return (INTERRUPT);
       lprintf ("%05lX    ", address);
       word0_was_written = peek (address, (ushort *) &fltwords[0]);
@@ -1159,7 +1157,7 @@ si_dispchar (int argc, char *argv[])
 {
   int i = 0, j = 0;
   ushort word, chr;
-  static ulong address = 0L;
+  static uint address = 0;
   static int length = 1;
   char line[CHARDUMPLEN + 1];
   bool verbose_save = verbose;
@@ -1183,7 +1181,7 @@ si_dispchar (int argc, char *argv[])
 
   while (i < length)
     {
-      if (sys_int (1L))
+      if (sys_int (1))
 	return (INTERRUPT);
 
       if (j == 0)
@@ -1247,7 +1245,7 @@ static int
 si_changemem (int argc, char *argv[])
 {
   ushort word;
-  ulong address;
+  uint address;
   unsigned number;
   char mline[256];
   bool verbose_save = verbose;
@@ -1347,7 +1345,7 @@ init_simulator (int mode)
       /* Reset breakpoint counter */
       n_breakpts = 0;
       /* Reset counter of total instructions executed */
-      instcnt = 0L;
+      instcnt = 0;
       /* Reset simulation time tracking */
       total_time_in_us = 0.0;
       /* Do loadfile processing initializations */
@@ -1379,7 +1377,7 @@ si_reset (int argc, char *argv[])
 static int
 si_tr (int argc, char *argv[])
 {
-  ulong address;
+  uint address;
 
   if (argc < 2)
     return error ("address missing");
@@ -1439,7 +1437,7 @@ typedef struct rep_rec {
   } u;
 } *reprec;
 
-static ulong phys_addr;
+static uint phys_addr;
 
 static void
 apply (reprec r)

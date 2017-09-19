@@ -5,10 +5,8 @@
 /* Component :        loadfile.c -- loadfile related functions             */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -82,7 +80,7 @@ init_load_formats ()
 loadfile_t loadfile_type = NONE;
 
 char *
-find_labelname (ulong address)
+find_labelname (uint address)
 {
   switch (loadfile_type)
     {
@@ -97,7 +95,7 @@ find_labelname (ulong address)
 }
 
 
-long
+int
 find_address (char *labelname)
 {
   switch (loadfile_type)
@@ -107,7 +105,7 @@ find_address (char *labelname)
     case COFF:
       return find_coff_address (labelname);
     default:
-      return -1L;
+      return -1;
     }
 }
 
@@ -135,7 +133,7 @@ int
 si_prolo (int argc, char *argv[])
 {
   ushort word;
-  ulong  abs_addr = 0L;
+  uint  abs_addr = 0;
   char  *filename = argv[1];
   FILE  *loadfile;
   bool   verbose_save = verbose;
@@ -167,7 +165,7 @@ int
 si_pslo (int argc, char *argv[])
 {
   ushort loadaddr_hiword, loadaddr_loword, n_words, i, word;
-  ulong  abs_addr = 0L;
+  uint  abs_addr = 0;
   bool status = OKAY, verbose_save = verbose;
   char *filename = argv[1];
   FILE  *loadfile;
@@ -200,7 +198,7 @@ si_pslo (int argc, char *argv[])
 	  status = error ("pslo: unexpected EOF reading load address low word");
 	  break;
 	}
-      abs_addr = (ulong) loadaddr_hiword << 16 | (ulong) loadaddr_loword;
+      abs_addr = (uint) loadaddr_hiword << 16 | (uint) loadaddr_loword;
       if (get_hilo16 (&n_words, loadfile) == EOF)
 	{
 	  status = error ("pslo: unexpected end-of-file reading wordcount");

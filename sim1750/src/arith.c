@@ -5,10 +5,8 @@
 /* Component :     arith.c -- simulate 1750A arithmetic operations         */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :           oliver.kellogg@space.otn.dasa.de                  */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -78,8 +76,8 @@ void
 compare (datatype data_type, short *operand0, short *operand1)
 {
   ushort sw_save = simreg.sw & 0x0FFF;
-  short op0, op1;
-  long lop0, lop1;
+  short   op0,  op1;
+  int    lop0, lop1;
   double fop0, fop1;
 
   switch (data_type)
@@ -95,8 +93,8 @@ compare (datatype data_type, short *operand0, short *operand1)
         simreg.sw = sw_save | CS_ZERO;
       break;
     case VAR_LONG:
-      lop0 = ((long) operand0[0] << 16) | ((long) operand0[1] & 0xFFFFL);
-      lop1 = ((long) operand1[0] << 16) | ((long) operand1[1] & 0xFFFFL);
+      lop0 = ((int) operand0[0] << 16) | ((int) operand0[1] & 0xFFFF);
+      lop1 = ((int) operand1[0] << 16) | ((int) operand1[1] & 0xFFFF);
       if (lop0 < lop1)
         simreg.sw = sw_save | CS_NEGATIVE;
       else if (lop0 > lop1)
@@ -175,10 +173,10 @@ arith (operation_kind operation,
 
             if (sign_comparison && (uop0 & 0x8000) != (uaccu & 0x8000))
               {
-                long lop0 = (long) *operand0, lop1 = (long) *operand1;
+                int lop0 = (int) *operand0, lop1 = (int) *operand1;
                 simreg.sw |= CS_CARRY;
                 simreg.pir |= INTR_FIXOFL;
-                info ("FIXOFL on integer %s, op0=%hd op1=%hd res=%ld",
+                info ("FIXOFL on integer %s, op0=%hd op1=%hd res=%d",
                       is_add ? "ADD" : "SUB", *operand0, *operand1,
                       is_add ? lop0 + lop1 : lop0 - lop1);
               }
@@ -190,36 +188,36 @@ arith (operation_kind operation,
         elsecase ARI_MUL:
           {
             /* Single precision integer multiply with 32-bit result */
-            long lop0 = (long) *operand0;
-            long lop1 = (long) *operand1;
-            long laccu;
+            int lop0 = (int) *operand0;
+            int lop1 = (int) *operand1;
+            int laccu;
 
             laccu = lop0 * lop1;
 
-            operand0[0] = (ushort) ((laccu >> 16) & 0xFFFFL);
-            operand0[1] = (ushort) (laccu & 0xFFFFL);
+            operand0[0] = (ushort) ((laccu >> 16) & 0xFFFF);
+            operand0[1] = (ushort) (laccu & 0xFFFF);
             update_cs (operand0, VAR_LONG);
           }
 
         elsecase ARI_MULS:
           {
-            long lop0 = (long) *operand0;
-            long lop1 = (long) *operand1;
-            long laccu;
+            int lop0 = (int) *operand0;
+            int lop1 = (int) *operand1;
+            int laccu;
             bool overflow = FALSE;
 
             laccu = lop0 * lop1;
 
-            if (lop0 != 0L && lop1 != 0L)
+            if (lop0 != 0 && lop1 != 0)
               {
-                if ((lop0 & 0x8000L) == (lop1 & 0x8000L))
+                if ((lop0 & 0x8000) == (lop1 & 0x8000))
                   {
-                    if ((laccu & 0xFFFF8000L) != 0)
+                    if ((laccu & 0xFFFF8000) != 0)
                       overflow = TRUE;
                   }
                 else
                   {
-                    if ((laccu & 0xFFFF8000L) != 0xFFFF8000L)
+                    if ((laccu & 0xFFFF8000) != 0xFFFF8000)
                       overflow = TRUE;
                   }
               }
@@ -227,7 +225,7 @@ arith (operation_kind operation,
             if (overflow)
               {
                 simreg.pir |= INTR_FIXOFL;
-                info ("FIXOFL on integer MULS, op0=%ld op1=%ld res=%ld",
+                info ("FIXOFL on integer MULS, op0=%d op1=%d res=%d",
                       lop0, lop1, laccu);
               }
 
@@ -238,22 +236,22 @@ arith (operation_kind operation,
         elsecase ARI_DIV:
           {
             /* 16 bit divide with 32-bit dividend */
-            long lop0 = ((long) operand0[0] << 16)
-                      | ((long) operand0[1] & 0xFFFFL);
-            long lop1 = (long) *operand1;
-            long laccu;
-            long rem;
+            int lop0 = ((int) operand0[0] << 16)
+                     | ((int) operand0[1] & 0xFFFF);
+            int lop1 = (int) *operand1;
+            int laccu;
+            int rem;
 
-            if (lop1 != 0L)
+            if (lop1 != 0)
               {
                 laccu = lop0 / lop1;
                 rem = lop0 % lop1;
               }
 
-            if (lop1 == 0L || (lop0 == 0x8000L && lop1 == 0xFFFFL))
+            if (lop1 == 0 || (lop0 == 0x8000 && lop1 == 0xFFFF))
               {
                 simreg.pir |= INTR_FIXOFL;
-                info ("FIXOFL on integer DIV, op0=%ld op1=%ld res=%ld",
+                info ("FIXOFL on integer DIV, op0=%d op1=%d res=%d",
                       lop0, lop1, laccu);
               }
             else        /* Put this in an "else" part because */
@@ -267,21 +265,21 @@ arith (operation_kind operation,
         elsecase ARI_DIVV:
           {
             /* 16 bit signed divide with 16-bit dividend */
-            long lop0 = (long) *operand0;
-            long lop1 = (long) *operand1;
-            long laccu;
-            long rem;
+            int lop0 = (int) *operand0;
+            int lop1 = (int) *operand1;
+            int laccu;
+            int rem;
 
-            if (lop1 != 0L)
+            if (lop1 != 0)
               {
                 laccu = lop0 / lop1;
                 rem = lop0 % lop1;
               }
 
-            if (lop1 == 0L || (lop0 == 0x8000L && lop1 == 0xFFFFL))
+            if (lop1 == 0 || (lop0 == 0x8000 && lop1 == 0xFFFF))
               {
                 simreg.pir |= INTR_FIXOFL;
-                info ("FIXOFL on integer DIVV, op0=%ld op1=%ld res=%ld",
+                info ("FIXOFL on integer DIVV, op0=%d op1=%d res=%d",
                       lop0, lop1, laccu);
               }
             else        /* Put this in an "else" part because */
@@ -296,14 +294,14 @@ arith (operation_kind operation,
     elsecase VAR_LONG:
       if (operation == ARI_ADD || operation == ARI_SUB)
         {
-          ulong ulop0 = ((ulong) operand0[0] << 16)
-                      | ((ulong) operand0[1] & 0xFFFFL);
-          ulong ulop1 = ((ulong) operand1[0] << 16)
-                      | ((ulong) operand1[1] & 0xFFFFL);
-          ulong ulaccu;
-          ulong op0sign = ulop0 >> 16;
-          ulong op1sign = ulop1 >> 16;
-          bool  sign_comparison;
+          uint ulop0 = ((uint) operand0[0] << 16)
+                     | ((uint) operand0[1] & 0xFFFF);
+          uint ulop1 = ((uint) operand1[0] << 16)
+                     | ((uint) operand1[1] & 0xFFFF);
+          uint ulaccu;
+          uint op0sign = ulop0 >> 16;
+          uint op1sign = ulop1 >> 16;
+          bool sign_comparison;
 
           if (operation == ARI_ADD)
             {
@@ -320,17 +318,16 @@ arith (operation_kind operation,
             {
               simreg.sw |= CS_CARRY;
               simreg.pir |= INTR_FIXOFL;
-              info ("FIXOFL on long %s, op0=%ld op1=%ld res=%ld",
+              info ("FIXOFL on long %s, op0=%d op1=%d res=%d",
                     (operation == ARI_ADD) ? "addition" : "subtraction",
-                    (long) ulop0, (long) ulop1, (long) ulaccu);
+                    (int) ulop0, (int) ulop1, (int) ulaccu);
             }
 
           operand0[0] = (short) (ulaccu >> 16);
-          operand0[1] = (short) (ulaccu & 0x0000FFFFL);
+          operand0[1] = (short) (ulaccu & 0x0000FFFF);
           update_cs (operand0, VAR_LONG);
         }
       else  /* ARI_MUL or ARI_DIV */
-#ifdef LONGLONG
         {
           long long lop0 = ((long long) operand0[0] << 16)
                          | ((long long) operand0[1] & 0xFFFFLL);
@@ -381,7 +378,7 @@ arith (operation_kind operation,
                 }
 
               if (lop1 == 0LL ||
-                  ((unsigned long long) lop0 == 0xFFFFFFFF80000000LL
+                  ((unsigned long long) lop0 == 0xFFFFFFFF80000000ULL
                    && lop1 == -1LL))
                 {
                   simreg.pir |= INTR_FIXOFL;
@@ -396,85 +393,6 @@ arith (operation_kind operation,
                 }
             }
         }
-#else
-#define MIN_LONG -0x80000000
-#define MAX_LONG  0x7FFFFFFF
-        {  /* Not so nice and easy if we don't have a larger data type. */
-          long lop0 = ((long) operand0[0] << 16) | ((long) operand0[1] & 0xFFFFL);
-          long lop1 = ((long) operand1[0] << 16) | ((long) operand1[1] & 0xFFFFL);
-          long laccu;
-          int opsign;
-          bool ari_interrupt = FALSE;
-
-          if (operation == ARI_ADD ? opsign = 1 :
-              operation == ARI_SUB ? opsign = -1 : 0)
-            {
-              if (lop0 > 0)                /* check for positive overflow */
-                {
-                  if ((opsign == 1 && lop1 > 0 || opsign == -1 && lop1 < 0)
-                      && opsign * lop1 > MAX_LONG - lop0)
-                    ari_interrupt = TRUE;
-                }
-              else                        /* check for negative overflow */
-                {
-                  if ((opsign == 1 && lop1 < 0 || opsign == -1 && lop1 > 0)
-                      && opsign * lop1 < MIN_LONG - lop0)
-                    ari_interrupt = TRUE;
-                }
-              if (ari_interrupt)
-                simreg.sw |= CS_CARRY;
-              else
-                laccu = (operation == ARI_ADD) ? lop0 + lop1 : lop0 - lop1;
-            }
-          else
-            /* MUL or DIV */
-            {
-              if (lop0 == 0 || lop1 == 0)
-                {
-                  if (lop1 == 0 && operation == ARI_DIV)
-                    ari_interrupt = TRUE;
-                  else
-                    laccu = 0;
-                }
-              else if (operation == ARI_MUL)
-                {               /* (integer division doesn't need any checks) */
-                  if (lop0 < 0 && lop1 < 0)        /* check for pos. overflow */
-                    {
-                      if (lop0 < MAX_LONG / lop1)
-                        ari_interrupt = TRUE;
-                    }
-                  else if (lop0 > 0 && lop1 > 0)
-                    {
-                      if (lop0 > MAX_LONG / lop1)
-                        ari_interrupt = TRUE;
-                    }
-                  else if (lop0 < 0 && lop1 > 0)        /* check for neg. overflow */
-                    {
-                      if (lop0 < MIN_LONG / lop1)
-                        ari_interrupt = TRUE;
-                    }
-                  else if (lop0 > 0 && lop1 < 0)
-                    {
-                      if (lop0 > MIN_LONG / -lop1)
-                        ari_interrupt = TRUE;
-                    }
-                  if (!ari_interrupt)
-                    laccu = lop0 * lop1;
-                }
-              else
-                laccu = lop0 / lop1;
-              if (ari_interrupt)
-                {
-                  simreg.pir |= INTR_FIXOFL;
-                  info ("FIXOFL on long %s,  op0=%ld op1=%ld res=%ld",
-                          operation_name[operation], lop0, lop1, laccu);
-                }
-            }
-          operand0[0] = (short) (laccu >> 16);
-          operand0[1] = (short) (laccu & 0xFFFFL);
-          update_cs (operand0, VAR_LONG);
-        }
-#endif
 
     elsecase VAR_FLOAT:
       {

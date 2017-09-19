@@ -5,10 +5,8 @@
 /* Component :   tekops.c -- Tektronix Extended Hex related functions      */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                                                                         */
-/* Author    :      Oliver M. Kellogg, Dornier Satellite Systems,          */
-/*                     Dept. RST13, D-81663 Munich, Germany.               */
-/* Contact   :            oliver.kellogg@space.otn.dasa.de                 */
+/*                         (C) 2017 Oliver M. Kellogg                      */
+/* Contact   :            okellogg@users.sourceforge.net                   */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -54,7 +52,7 @@ extern struct regs simreg;  /* from cpu.c */
 struct section
   {
     char  *name;
-    ulong base_addr;
+    uint base_addr;
     int   length;
   };
 static struct section section[MAX_SECTIONS];
@@ -65,7 +63,7 @@ struct symbol
   {
     char   *name;
     int    type;
-    ulong  value;
+    uint  value;
     struct section *sect;
   };
 
@@ -114,20 +112,20 @@ init_tekops ()	/* free up previous memory allocations; initialize */
 }
 
 
-long
+int
 find_tek_address (char *labelname)
 {
   int i;
 
   for (i = 0; i < symdata.n_used; i++)
     if (eq (labelname, symdata.sym[i].name))
-      return (long) symdata.sym[i].value;
-  return -1L;
+      return (int) symdata.sym[i].value;
+  return -1;
 }
 
 
 char *
-find_tek_label (ulong address)
+find_tek_label (uint address)
 {
   int i = symdata.n_used;
 
@@ -142,19 +140,19 @@ find_tek_label (ulong address)
 		   isupper (ch) ? (ch) - ('A' - 10) :	\
 		   islower (ch) ? (ch) - ('a' - 10) : -1)
 
-static long 
+static int 
 get_xnum (char **string, int number)
 {
   int nibble;
-  ulong retval = 0L;
+  uint retval = 0;
   char *p = *string;
 
   while (number-- > 0)
     {
       nibble = *p++;
       if ((nibble = x_nib (nibble)) < 0)
-	return -1L;
-      retval = (retval << 4) | (ulong) (nibble & 0xF);
+	return -1;
+      retval = (retval << 4) | (uint) (nibble & 0xF);
     }
   *string = p;
   return (retval);
@@ -190,9 +188,9 @@ load_tekline (char *line)
 {
   char  sectname[32], *linep;
   int   i, checksum, type, blk_len, addr_len, line_len;
-  ulong address;
+  uint address;
 
-  if (sys_int (1L))
+  if (sys_int (1))
     return (INTERRUPT);
 
   if (line[0] != '%')
@@ -225,9 +223,9 @@ load_tekline (char *line)
 	  if (type == 0)	/* section definition */
 	    {
 	      int   baseaddr_len = (int) get_xnum (&linep, 1);
-	      ulong baseaddr     =       get_xnum (&linep, baseaddr_len);
+	      uint baseaddr     =       get_xnum (&linep, baseaddr_len);
 	      int   sectlen_len  = (int) get_xnum (&linep, 1);
-	      ulong sectlen      =       get_xnum (&linep, sectlen_len);
+	      uint sectlen      =       get_xnum (&linep, sectlen_len);
 
 	      /* lprintf ("\nSEC %s %s\n", sectname, linep); */
 	      section[n_sections].name = strdup (sectname);
@@ -239,7 +237,7 @@ load_tekline (char *line)
 	    {
 	      int len, val_len;
 	      char sym[40];
-	      ulong val;
+	      uint val;
 
 	      len = (int) get_xnum (&linep, 1); /* symbol name length */
 	      if (len == 0)
@@ -354,7 +352,7 @@ display_tek_symbols ()
 	  lprintf ("-------------------------------------------------------\n");
 	  lprintf ("Symbolname           Value Type                 Section\n");
 	}
-      lprintf ("%-20s %l05X %-20s %s\n", symdata.sym[i].name,
+      lprintf ("%-20s %05X %-20s %s\n", symdata.sym[i].name,
 		symdata.sym[i].value, typename[symdata.sym[i].type],
 		symdata.sym[i].sect->name);
     }
@@ -375,17 +373,17 @@ si_save (int argc, char *argv[])
 
   for (pgndx = 0; pgndx < N_PAGES; pgndx++)
     {
-      ulong phys_address = pgndx << 12;
+      uint phys_address = pgndx << 12;
       if ((memptr = mem[pgndx]) == MNULL)
 	continue;
       for (locndx = 0; locndx < 4096; locndx++)
 	{
-	  if (memptr->was_written[locndx / 32] & (1L << (locndx % 32)))
+	  if (memptr->was_written[locndx / 32] & (1 << (locndx % 32)))
 	    emit_tekword (phys_address + locndx, memptr->word[locndx]);
 	}
     }
 
-  close_tekfile ((ulong) simreg.ic);  /* other regs are lost, to be improved */
+  close_tekfile ((uint) simreg.ic);  /* other regs are lost, to be improved */
 
   return OKAY;
 }
