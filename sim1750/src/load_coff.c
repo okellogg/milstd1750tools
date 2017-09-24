@@ -2,18 +2,18 @@
  * load_coff.c
  *
  * 1750 Simulator loader for GCC-generated executable COFF files
- * 
+ *
  * Copyright (c) 1996, Chris Nettleton Software
  *
- * The authors hereby grant permission to use, copy, modify, distribute, 
- * and license this software and its documentation for any purpose, 
- * provided that existing copyright notices are retained in all copies 
- * and that this notice is included verbatim in any distributions. No 
- * written agreement, license, or royalty fee is required for any of the 
- * authorized uses. Modifications to this software may be copyrighted by 
- * their authors and need not follow the licensing terms described here, 
- * provided that the new terms are clearly indicated on the first page 
- * of each file where they apply. 
+ * The authors hereby grant permission to use, copy, modify, distribute,
+ * and license this software and its documentation for any purpose,
+ * provided that existing copyright notices are retained in all copies
+ * and that this notice is included verbatim in any distributions. No
+ * written agreement, license, or royalty fee is required for any of the
+ * authorized uses. Modifications to this software may be copyrighted by
+ * their authors and need not follow the licensing terms described here,
+ * provided that the new terms are clearly indicated on the first page
+ * of each file where they apply.
  *
  * $Log$
  *
@@ -38,8 +38,8 @@ static int optz = 0;   /* print strings */
 
 
 /*
- * This the coff file header. 
- * See 'Understanding and Using COFF', page 22. 
+ * This the coff file header.
+ * See 'Understanding and Using COFF', page 22.
  */
 /* typedef unsigned char byte; */
 
@@ -58,17 +58,17 @@ struct filehdr {
 
 /*
  * MIL-STD-1750 Flags (top 4 bits)
- * F_M1750B1       1750B option 1 -  
- * F_M1750B2       1750B option 2 -  
- * F_M1750B3       1750B option 3 - 
- * F_M1750MMU      Memory management unit required 
+ * F_M1750B1       1750B option 1 -
+ * F_M1750B2       1750B option 2 -
+ * F_M1750B3       1750B option 3 -
+ * F_M1750MMU      Memory management unit required
  */
 #define F_M1750B1        (0x1000)
 #define F_M1750B2        (0x2000)
 #define F_M1750B3        (0x4000)
 #define F_M1750MMU       (0x8000)
 
-/* 
+/*
  * Bits for f_flags:
  *  F_RELFLG        relocation info stripped from file
  *  F_EXEC          file is executable (no unresolved external references)
@@ -95,9 +95,9 @@ struct filehdr {
 
 /*
  * This is the optional header
- * See 'Understanding and Using COFF', page 27. 
+ * See 'Understanding and Using COFF', page 27.
  */
-typedef struct 
+typedef struct
 {
   byte magic [2];        /* type of file                          */
   byte vstamp [2];       /* version stamp                         */
@@ -113,9 +113,9 @@ AOUTHDR aout_header;
 #define AOUTSZ 28
 #define AOUTHDRSZ 28
 
-/* 
+/*
  * This is a section header
- * See 'Understanding and Using COFF', page 36. 
+ * See 'Understanding and Using COFF', page 36.
  */
 struct scnhdr {
   byte s_name [8];    /* section name                     */
@@ -144,7 +144,7 @@ struct scnhdr {
 
 /*
  * The relocation record
- * See 'Understanding and Using COFF', page 40. 
+ * See 'Understanding and Using COFF', page 40.
  */
 struct reloc {
   byte r_vaddr [4];     /* address of reference */
@@ -222,13 +222,13 @@ struct reloc {
 #define C_LASTENT       20      /* dummy entry (end of block)   */
 
 /*
- * Symbol table entries 
+ * Symbol table entries
  */
 #define E_SYMNMLEN  8   /* # characters in a symbol name         */
 #define E_FILNMLEN 14   /* # characters in a file name           */
 #define E_DIMNUM    4   /* # array dimensions in auxiliary entry */
 
-struct syment 
+struct syment
 {
   union {
     byte e_name [E_SYMNMLEN];
@@ -244,7 +244,7 @@ struct syment
   byte e_numaux [1];
 } se;
 
-struct internal_syment 
+struct internal_syment
 {
   char e_name [E_SYMNMLEN];
   struct {
@@ -263,7 +263,7 @@ struct internal_syment
 #define N_TMASK   (060)
 #define N_BTSHFT  (4)
 #define N_TSHIFT  (2)
-  
+
 union auxent {
   struct {
     byte x_tagndx[4];    /* str, un, or enum tag indx */
@@ -308,20 +308,20 @@ union auxent {
 } ae;
 
 #define SYMENT struct syment
-#define SYMESZ 18      
+#define SYMESZ 18
 #define AUXENT union auxent
 #define AUXESZ 18
 
 
 /* Contents of file header
  */
-static ushort f_magic; 
+static ushort f_magic;
 static ushort f_nscns;
-static int f_timdat;          
-static int f_symptr;        
-static int f_nsyms;       
-static ushort f_opthdr;  
-static ushort f_flags; 
+static int f_timdat;
+static int f_symptr;
+static int f_nsyms;
+static ushort f_opthdr;
+static ushort f_flags;
 
 /* Contents of the optional header
  */
@@ -344,12 +344,12 @@ static int str_length = 0;
 static char   s_name [9];
 static uint  s_paddr;
 static uint  s_vaddr;
-static uint  s_size; 
+static uint  s_size;
 static uint  s_scnptr;
 static uint  s_relptr;
 static uint  s_lnnoptr;
 static ushort s_nreloc;
-static ushort s_nlnno; 
+static ushort s_nlnno;
 static uint  s_flags;
 
 /* Contents of most recent reloc record
@@ -363,12 +363,12 @@ static uint r_offset;
 
 /* Contents of the most recent line number record
 */
-static uint l_symndx; 
-static uint l_paddr; 
-static ushort l_lnno; 
+static uint l_symndx;
+static uint l_paddr;
+static ushort l_lnno;
 
 
-static void 
+static void
 get_file_header ()
 {
   f_magic  = ((ushort) file_header.f_magic  [0] << 8) +
@@ -376,19 +376,19 @@ get_file_header ()
   f_nscns  = ((ushort) file_header.f_nscns  [0] << 8) +
               (ushort) file_header.f_nscns  [1];
 
-  f_timdat = ((uint) file_header.f_timdat [0] << 24) + 
+  f_timdat = ((uint) file_header.f_timdat [0] << 24) +
              ((uint) file_header.f_timdat [1] << 16) +
-             ((uint) file_header.f_timdat [2] << 8) + 
+             ((uint) file_header.f_timdat [2] << 8) +
              ((uint) file_header.f_timdat [3]);
 
-  f_symptr = ((uint) file_header.f_symptr [0] << 24) + 
+  f_symptr = ((uint) file_header.f_symptr [0] << 24) +
              ((uint) file_header.f_symptr [1] << 16) +
-             ((uint) file_header.f_symptr [2] << 8) + 
+             ((uint) file_header.f_symptr [2] << 8) +
              ((uint) file_header.f_symptr [3]);
 
-  f_nsyms  = ((uint) file_header.f_nsyms  [0] << 24) + 
+  f_nsyms  = ((uint) file_header.f_nsyms  [0] << 24) +
              ((uint) file_header.f_nsyms  [1] << 16) +
-             ((uint) file_header.f_nsyms  [2] << 8) + 
+             ((uint) file_header.f_nsyms  [2] << 8) +
              ((uint) file_header.f_nsyms  [3]);
 
   f_opthdr = ((ushort) file_header.f_opthdr [0] << 8) +
@@ -397,7 +397,7 @@ get_file_header ()
               (ushort) file_header.f_flags  [1];
 }
 
-static void 
+static void
 dump_file_header ()
 {
   printf ("----File-Header---------------------------------------------\n");
@@ -409,7 +409,7 @@ dump_file_header ()
   printf ("Sizeof (optional hdr)    = %d\n",     f_opthdr);
   printf ("Flags                    = 0x%04X\n", f_flags);
 
-  if (f_flags) 
+  if (f_flags)
     {
       printf ("Known flags: ");
       if (f_flags & F_M1750B1)
@@ -422,21 +422,21 @@ dump_file_header ()
         printf ("M1750MMU ");
       if (f_flags & F_RELFLG)
         printf ("RELFLG ");
-      if (f_flags & F_EXEC)   
+      if (f_flags & F_EXEC)
         printf ("EXEC ");
-      if (f_flags & F_LNNO)  
+      if (f_flags & F_LNNO)
         printf ("LNNO ");
       if (f_flags & F_LSYMS)
         printf ("LSYMS ");
-      if (f_flags & F_AR16WR) 
+      if (f_flags & F_AR16WR)
         printf ("AR16W ");
       if (f_flags & F_AR32WR)
         printf ("AR16WR ");
-      if (f_flags & F_AR32W)     
+      if (f_flags & F_AR32W)
         printf ("AR32W ");
-      if (f_flags & F_DYNLOAD)   
+      if (f_flags & F_DYNLOAD)
         printf ("DYNLOAD ");
-      if (f_flags & F_SHROBJ)   
+      if (f_flags & F_SHROBJ)
         printf ("SHROBJ ");
       if (f_flags & F_DLL)
         printf ("DLL");
@@ -452,38 +452,38 @@ get_opt_header ()
   vstamp = ((ushort) aout_header.magic [0] << 8) +
             (ushort) aout_header.vstamp [1];
 
-  tsize  = ((uint) aout_header.tsize [0] << 24) + 
+  tsize  = ((uint) aout_header.tsize [0] << 24) +
            ((uint) aout_header.tsize [1] << 16) +
-           ((uint) aout_header.tsize [2] << 8) + 
+           ((uint) aout_header.tsize [2] << 8) +
            ((uint) aout_header.tsize [3]);
 
-  dsize  = ((uint) aout_header.dsize [0] << 24) + 
+  dsize  = ((uint) aout_header.dsize [0] << 24) +
            ((uint) aout_header.dsize [1] << 16) +
-           ((uint) aout_header.dsize [2] << 8) + 
+           ((uint) aout_header.dsize [2] << 8) +
            ((uint) aout_header.dsize [3]);
 
-  bsize  = ((uint) aout_header.bsize [0] << 24) + 
+  bsize  = ((uint) aout_header.bsize [0] << 24) +
            ((uint) aout_header.bsize [1] << 16) +
-           ((uint) aout_header.bsize [2] << 8) + 
+           ((uint) aout_header.bsize [2] << 8) +
            ((uint) aout_header.bsize [3]);
 
-  entry  = ((uint) aout_header.entry [0] << 24) + 
+  entry  = ((uint) aout_header.entry [0] << 24) +
            ((uint) aout_header.entry [1] << 16) +
-           ((uint) aout_header.entry [2] << 8) + 
+           ((uint) aout_header.entry [2] << 8) +
            ((uint) aout_header.entry [3]);
 
-  text_start = ((uint) aout_header.text_start [0] << 24) + 
+  text_start = ((uint) aout_header.text_start [0] << 24) +
                ((uint) aout_header.text_start [1] << 16) +
-               ((uint) aout_header.text_start [2] << 8) + 
+               ((uint) aout_header.text_start [2] << 8) +
                ((uint) aout_header.text_start [3]);
 
-  data_start = ((uint) aout_header.data_start [0] << 24) + 
+  data_start = ((uint) aout_header.data_start [0] << 24) +
                ((uint) aout_header.data_start [1] << 16) +
-               ((uint) aout_header.data_start [2] << 8) + 
+               ((uint) aout_header.data_start [2] << 8) +
                ((uint) aout_header.data_start [3]);
 }
 
-static void 
+static void
 dump_opt_header ()
 {
   printf ("----Optional-header------------------------------------------\n");
@@ -497,62 +497,62 @@ dump_opt_header ()
   printf ("Start of data            = 0x%08X\n", data_start);
 }
 
-static void 
+static void
 get_sec_header ()
 {
   memset (s_name, 0, 9);
   memcpy (s_name, sec_header.s_name,8);
-   
-  s_paddr   = ((uint) sec_header.s_paddr [0] << 24) + 
+
+  s_paddr   = ((uint) sec_header.s_paddr [0] << 24) +
               ((uint) sec_header.s_paddr [1] << 16) +
-              ((uint) sec_header.s_paddr [2] << 8) + 
+              ((uint) sec_header.s_paddr [2] << 8) +
               ((uint) sec_header.s_paddr [3]);
-    
-  s_vaddr   = ((uint) sec_header.s_vaddr [0] << 24) + 
+
+  s_vaddr   = ((uint) sec_header.s_vaddr [0] << 24) +
               ((uint) sec_header.s_vaddr [1] << 16) +
-              ((uint) sec_header.s_vaddr [2] << 8) + 
+              ((uint) sec_header.s_vaddr [2] << 8) +
               ((uint) sec_header.s_vaddr [3]);
-    
-  s_size    = ((uint) sec_header.s_size  [0] << 24) + 
+
+  s_size    = ((uint) sec_header.s_size  [0] << 24) +
               ((uint) sec_header.s_size  [1] << 16) +
-              ((uint) sec_header.s_size  [2] << 8) + 
+              ((uint) sec_header.s_size  [2] << 8) +
               ((uint) sec_header.s_size  [3]);
-    
-  s_scnptr  = ((uint) sec_header.s_scnptr [0] << 24) + 
+
+  s_scnptr  = ((uint) sec_header.s_scnptr [0] << 24) +
               ((uint) sec_header.s_scnptr [1] << 16) +
-              ((uint) sec_header.s_scnptr [2] << 8) + 
+              ((uint) sec_header.s_scnptr [2] << 8) +
               ((uint) sec_header.s_scnptr [3]);
-    
-  s_relptr  = ((uint) sec_header.s_relptr [0] << 24) + 
+
+  s_relptr  = ((uint) sec_header.s_relptr [0] << 24) +
               ((uint) sec_header.s_relptr [1] << 16) +
-              ((uint) sec_header.s_relptr [2] << 8) + 
+              ((uint) sec_header.s_relptr [2] << 8) +
               ((uint) sec_header.s_relptr [3]);
-    
+
   s_nreloc  = ((ushort) sec_header.s_nreloc [0] << 8) +
                (ushort) sec_header.s_nreloc [1];
   s_nlnno   = ((ushort) sec_header.s_nlnno  [0] << 8) +
                (ushort) sec_header.s_nlnno  [1];
 
-  s_lnnoptr = ((uint) sec_header.s_lnnoptr [0] << 24) + 
+  s_lnnoptr = ((uint) sec_header.s_lnnoptr [0] << 24) +
               ((uint) sec_header.s_lnnoptr [1] << 16) +
-              ((uint) sec_header.s_lnnoptr [2] << 8) + 
+              ((uint) sec_header.s_lnnoptr [2] << 8) +
               ((uint) sec_header.s_lnnoptr [3]);
-    
-  s_flags   = ((uint) sec_header.s_flags [0] << 24) + 
+
+  s_flags   = ((uint) sec_header.s_flags [0] << 24) +
               ((uint) sec_header.s_flags [1] << 16) +
-              ((uint) sec_header.s_flags [2] << 8) + 
+              ((uint) sec_header.s_flags [2] << 8) +
               ((uint) sec_header.s_flags [3]);
 }
 
-    
-static void 
+
+static void
 dump_sec_header (int sec)
 {
   printf ("----Section-%d-header----------------------------------------\n", sec);
   printf ("Section name             = %s\n", s_name);
-  printf ("Physical address         = %08X\n", s_paddr);    
-  printf ("Virtual address          = %08X\n", s_vaddr);    
-  printf ("Section size             = %08X (%d)\n", s_size, s_size);     
+  printf ("Physical address         = %08X\n", s_paddr);
+  printf ("Virtual address          = %08X\n", s_vaddr);
+  printf ("Section size             = %08X (%d)\n", s_size, s_size);
 }
 
 static void
@@ -579,9 +579,9 @@ get_strings (FILE *input_file)
     }
   else
     {
-      str_length = ((unsigned) length [0] << 24) + 
+      str_length = ((unsigned) length [0] << 24) +
                    ((unsigned) length [1] << 16) +
-                   ((unsigned) length [2] << 8) + 
+                   ((unsigned) length [2] << 8) +
                    ((unsigned) length [3]);
     }
 
@@ -601,7 +601,7 @@ get_strings (FILE *input_file)
     }
 }
 
-static void 
+static void
 dump_strings ()
 {
   printf ("----The-string-table-----------------------------------------\n");
@@ -610,18 +610,18 @@ dump_strings ()
     {
       int length = str_length;
       char *ptr = str_tab;
-      do 
+      do
          {
            printf ("%08X : %s\n", (ptr - str_tab), ptr);
            while (*ptr++ != '\0')
              ;
-         }  
+         }
       while (ptr < (str_tab + length));
     }
 
 }
 
-static void 
+static void
 get_se (struct internal_syment *ise)
 {
   int i;
@@ -629,19 +629,19 @@ get_se (struct internal_syment *ise)
   for (i = 0; i < E_SYMNMLEN; i++)
     ise->e_name [i] = se.e.e_name [i];
 
-  ise->e.e_zeroes  = ((uint) se.e.e.e_zeroes [0] << 24) + 
+  ise->e.e_zeroes  = ((uint) se.e.e.e_zeroes [0] << 24) +
                      ((uint) se.e.e.e_zeroes [1] << 16) +
-                     ((uint) se.e.e.e_zeroes [2] << 8) + 
+                     ((uint) se.e.e.e_zeroes [2] << 8) +
                      ((uint) se.e.e.e_zeroes [3]);
 
-  ise->e.e_offset  = ((uint) se.e.e.e_offset [0] << 24) + 
+  ise->e.e_offset  = ((uint) se.e.e.e_offset [0] << 24) +
                      ((uint) se.e.e.e_offset [1] << 16) +
-                     ((uint) se.e.e.e_offset [2] << 8) + 
+                     ((uint) se.e.e.e_offset [2] << 8) +
                      ((uint) se.e.e.e_offset [3]);
 
-  ise->e_value     = ((uint) se.e_value  [0] << 24) + 
+  ise->e_value     = ((uint) se.e_value  [0] << 24) +
                      ((uint) se.e_value  [1] << 16) +
-                     ((uint) se.e_value  [2] << 8) + 
+                     ((uint) se.e_value  [2] << 8) +
                      ((uint) se.e_value  [3]);
 
   ise->e_scnum   = ((ushort) se.e_scnum  [0] << 8) +
@@ -654,7 +654,7 @@ get_se (struct internal_syment *ise)
 }
 
 
-static void 
+static void
 get_dst (FILE *input_file)
 {
   /* Read the debug symbol table into memory
@@ -682,7 +682,7 @@ get_dst (FILE *input_file)
 
 }
 
-static void 
+static void
 print_se (struct internal_syment *se)
 {
   /* pretty print a symbol table entry */
@@ -696,14 +696,14 @@ print_se (struct internal_syment *se)
 
   /* skip names begining with a dot */
   if (se->e.e_zeroes && se->e_name [0] == '.')
-    return; 
+    return;
 
-  /* filter interesting classes */ 
+  /* filter interesting classes */
   switch (se->e_sclass)
     {
     case C_NULL:    class = "        "; break;
-    case C_EXT:     class = " extern "; break; 
-    case C_STAT:    class = " static "; break; 
+    case C_EXT:     class = " extern "; break;
+    case C_STAT:    class = " static "; break;
     default:
       return;
     }
@@ -729,7 +729,7 @@ print_se (struct internal_syment *se)
     case T_ULONG:  printf ("uint   "); break;
     default:       printf ("%6d  ", se->e_type); break;
     }
- 
+
   /* print the value */
   printf ("%08X  ", se->e_value >> 1);
 
@@ -775,7 +775,7 @@ pretty_print_dst ()
 }
 
 
-static int 
+static int
 process_file (FILE* input_file)
 {
   /*
@@ -832,29 +832,29 @@ process_file (FILE* input_file)
 
       /* load section */
       if (1)
-	{
-	  unsigned char *raw_data = (unsigned char *)malloc (s_size);
-	  int j;
-	  int address = s_paddr >> 1;
+        {
+          unsigned char *raw_data = (unsigned char *)malloc (s_size);
+          int j;
+          int address = s_paddr >> 1;
 
-	  fseek (input_file, s_scnptr, 0);
-	  fread (raw_data, s_size, 1, input_file);
+          fseek (input_file, s_scnptr, 0);
+          fread (raw_data, s_size, 1, input_file);
 
-	  j = 0;
-	  while (j < s_size)
-	    {
-	      /* poke a word */
-	      poke (address++, ((ushort) raw_data [j] << 8)
+          j = 0;
+          while (j < s_size)
+            {
+              /* poke a word */
+              poke (address++, ((ushort) raw_data [j] << 8)
                               + (ushort) raw_data [j + 1]);
-	      j += 2;
-	    }
-	  free (raw_data);
-	}
+              j += 2;
+            }
+          free (raw_data);
+        }
 
       if (s_nreloc > 0)
-	{
-	  return error ("File contains relocations");
-	}
+        {
+          return error ("File contains relocations");
+        }
 
     }
 
@@ -949,7 +949,7 @@ find_coff_address (char *id)
             {
               for (j = 0; j < 8; j++)
                 short_id [j] = se->e_name [j];
-    
+
               short_id [8] = '\0';
               key = short_id;
             }
