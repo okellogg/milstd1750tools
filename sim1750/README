@@ -22,7 +22,7 @@ to invoke. Then type "help" to see available commands with short explanations.
 BUILDING UNDER VMS
 ------------------
 
-sim1750 has only been built on a VAX with DEC C, not an AXP yet.
+sim1750 2.3b had successfully been built on a VAX with DEC C.
 To build under VMS, copy the file vmsbuild.com and all files from the ./src
 subdirectory to a build directory on your VMS machine. Then invoke
 
@@ -41,32 +41,14 @@ SIM1750.EXE resides.)
 BUILDING UNDER DOS/WIN32/WINNT
 ------------------------------
 
-The simulator has been built and tested under both 32-bit Windows-95
-(using Borland C/C++ or Cygnus Win32 GCC, thanks to M. Martignano at
-ESA/ESTEC) and 16-bit plain DOS (using Borland C/C++ 3.0.)
-Do the following:
-
-* If compiling under 16-bit DOS with Borland C/C++, then define a
-  project SIM1750.PRJ that includes all the .c files from the ./src
-  subdirectory. This procedure is different depending on your OS
-  environment and compiler used.
-
-* Define following macro symbols for compilation:
-
-  STRDUP;STRNCMP
-
-* If under 16-bit DOS, choose at least the Large memory model for
-  compilation.
-
-* Under DOS, there is a very noticeable difference in execution
-  time between SPEED OFF and SPEED ON. With SPEED ON, it is
-  not possible to interrupt execution by pressing <Control-C>,
-  but the simulation runs much faster.
+The simulator had been built and tested under 32 bit Windows-95
+using Borland C/C++ or Cygnus Win32 GCC.
+Support for 16 bit DOS has been dropped in version 2.3c.
 
 --
 
-Timing-info supported for following processors: PACE, F9450, GVSC,
-MA31750, MAS281.
+Timing info is supported for following processors:
+PACE, F9450, GVSC, MA31750, MAS281.
 
 Define the appropriate symbol in file sys_defs.h. Also define the
 symbol uP_CYCLE_IN_NS in the same file. E.g. for a PACE chip at 20 MHz:
