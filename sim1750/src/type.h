@@ -7,16 +7,16 @@
 
 /* If you get "undefined type" errors about uint / ushort / uchar
    then change the #if 0 to #if 1 below:                       */
-#if 0
-#ifndef uint
-#define uint    unsigned int
-#endif
-#ifndef ushort
-#define ushort  unsigned short
-#endif
-#ifndef uchar
-#define uchar   unsigned char
-#endif
+#ifndef HAVE_UTYPES
+# ifndef uint
+#  define uint    unsigned int
+# endif
+# ifndef ushort
+#  define ushort  unsigned short
+# endif
+# ifndef uchar
+#  define uchar   unsigned char
+# endif
 #endif
 
 #ifndef byte
