@@ -1,3 +1,21 @@
+Changes in sim1750 version 2.3c:
+
+* Compiled on Ubuntu Linux (14.04)
+
+* Cleaned up src/type.h :
+  - Avoid type `long', its size varies among host architectures
+  - The types uint / ushort seem to be predefined on Ubuntu
+    (may need tweaking on other platforms)
+
+* Integrated bugfix to LSTI and LST instructions by Jay Kulpinski of
+  General Dynamics Advanced Information Systems:
+  > The issue is that GET() uses the AS field in the status word to
+  > compute the physical address of the desired word. If you update
+  > the status word before fetching the new value of the instruction
+  > counter, the IC will be fetched using the new address space instead
+  > of the old.
+
+
 Changes in sim1750 version 2.3b:
 
 * Renamed files mem.[ch] to phys_mem.[ch] to avoid conflict with
