@@ -9,11 +9,10 @@ CC=      gcc
 # Some playing around with CFLAGS may be needed for your host system
 
 ## CFLAGS for Sun/Solaris with GNU readline
-# CFLAGS= -D__STDC__=0 -DSTRDUP -DSTRNCASECMP -DLONGLONG  # -DGNU_READLINE
-CFLAGS= -I./src -DSTRNDUP -DSTRNCASECMP # -DGNU_READLINE
+# CFLAGS= -D__STDC__=0 -DSTRNDUP -DSTRNCASECMP # -DGNU_READLINE
 
-# CFLAGS for Linux
-# CFLAGS= -DSTRDUP -DSTRNCASECMP  # -DLONGLONG
+# CFLAGS for Linux and hopefully other Unixes
+CFLAGS= -I./src -DSTRNDUP -DSTRNCASECMP -DHAVE_UTYPES # -DGNU_READLINE
 
 
 PROJ_DIR=.
