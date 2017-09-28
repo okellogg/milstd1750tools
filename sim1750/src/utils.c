@@ -186,12 +186,14 @@ findc (char *s, char c)		/* A strchr that excludes embedded character */
       if (*s == c && (c == '"' || c == '\'' ? TRUE : !inside_string))
 	return s;
       else if (*s == '"' || *s == '\'')
-	if (s > start && *(s - 1) == '\\')
-	  ;
-	else if (inside_string)
-	  inside_string = 0;
-	else
-	  inside_string = 1;
+	{
+	  if (s > start && *(s - 1) == '\\')
+	    ;
+	  else if (inside_string)
+	    inside_string = 0;
+	  else
+	    inside_string = 1;
+	}
       s++;
     }
   return NULL;
