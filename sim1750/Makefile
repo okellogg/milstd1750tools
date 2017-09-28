@@ -45,15 +45,14 @@ OBJECTS= $(OBJ)/arith.o		\
 
 SOURCES= $(OBJECTS:$(OBJ)/%.o=$(SRC)/%.c)
 
-sim1750: $(OBJECTS)
+all: sim1750
+
+sim1750: $(OBJ) $(OBJECTS)
 	$(CC) $(CFLAGS) -o $(PROJ_DIR)/sim1750 $(OBJECTS) -lm
 #	$(CC) $(CFLAGS) -o $(PROJ_DIR)/sim1750 $(OBJECTS) -lm -lreadline -ltermcap
 
-all:
-	@for i in $(OBJECTS:$(OBJ).o=$(SRC).c); do \
-		( touch $$i )          \
-				    done
-	-@echo "all sources touched, now rerun MAKE for desired target"
+$(OBJ):
+	mkdir -p $@
 
 profile: $(OBJECTS)
 	$(CC) -p -o $(PROJ_DIR)/sim $(OBJECTS)
