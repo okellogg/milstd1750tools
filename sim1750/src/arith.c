@@ -239,23 +239,16 @@ arith (operation_kind operation,
             int lop0 = ((int) operand0[0] << 16)
                      | ((int) operand0[1] & 0xFFFF);
             int lop1 = (int) *operand1;
-            int laccu;
-            int rem;
 
-            if (lop1 != 0)
-              {
-                laccu = lop0 / lop1;
-                rem = lop0 % lop1;
-              }
-
-            if (lop1 == 0 || (lop0 == 0x8000 && lop1 == 0xFFFF))
+            if (lop1 == 0 || (lop0 == 0x80000000 && lop1 == -1))
               {
                 simreg.pir |= INTR_FIXOFL;
-                info ("FIXOFL on integer DIV, op0=%d op1=%d res=%d",
-                      lop0, lop1, laccu);
+                info ("FIXOFL on integer DIV, op0=%d op1=%d", lop0, lop1);
               }
-            else        /* Put this in an "else" part because */
-              {         /* laccu and rem are otherwise undefined */
+            else
+              {
+                int laccu = lop0 / lop1;
+                int rem = lop0 % lop1;
                 operand0[0] = (short) laccu;
                 operand0[1] = (short) rem;
                 update_cs (operand0, VAR_INT);
@@ -267,23 +260,16 @@ arith (operation_kind operation,
             /* 16 bit signed divide with 16-bit dividend */
             int lop0 = (int) *operand0;
             int lop1 = (int) *operand1;
-            int laccu;
-            int rem;
 
-            if (lop1 != 0)
-              {
-                laccu = lop0 / lop1;
-                rem = lop0 % lop1;
-              }
-
-            if (lop1 == 0 || (lop0 == 0x8000 && lop1 == 0xFFFF))
+            if (lop1 == 0 || (lop0 == 0x80000000 && lop1 == -1))
               {
                 simreg.pir |= INTR_FIXOFL;
-                info ("FIXOFL on integer DIVV, op0=%d op1=%d res=%d",
-                      lop0, lop1, laccu);
+                info ("FIXOFL on integer DIVV, op0=%d op1=%d res=%d", lop0, lop1);
               }
-            else        /* Put this in an "else" part because */
-              {         /* laccu and rem are otherwise undefined */
+            else
+              {
+                int laccu = lop0 / lop1;
+                int rem = lop0 % lop1;
                 operand0[0] = (short) laccu;
                 operand0[1] = (short) rem;
                 update_cs (operand0, VAR_INT);
@@ -299,22 +285,20 @@ arith (operation_kind operation,
           uint ulop1 = ((uint) operand1[0] << 16)
                      | ((uint) operand1[1] & 0xFFFF);
           uint ulaccu;
-          uint op0sign = ulop0 >> 16;
-          uint op1sign = ulop1 >> 16;
           bool sign_comparison;
 
           if (operation == ARI_ADD)
             {
               ulaccu = ulop0 + ulop1;
-              sign_comparison = (op0sign == op1sign);
+              sign_comparison = ((ulop0 & 0x80000000) == (ulop1 & 0x80000000));
             }
           else
             {
               ulaccu = ulop0 - ulop1;
-              sign_comparison = (op0sign != op1sign);
+              sign_comparison = ((ulop0 & 0x80000000) != (ulop1 & 0x80000000));
             }
 
-          if (sign_comparison && op0sign != (ulaccu >> 16))
+          if (sign_comparison && (ulop0 & 0x80000000) != (ulaccu & 0x80000000))
             {
               simreg.sw |= CS_CARRY;
               simreg.pir |= INTR_FIXOFL;
@@ -367,7 +351,14 @@ arith (operation_kind operation,
             }
           else  /* ARI_DIV */
             {
-              if (lop1 != 0LL)
+              if (lop1 == 0LL ||
+                  ((unsigned long long) lop0 == 0xFFFFFFFF80000000ULL
+                   && lop1 == -1LL))
+                {
+                  simreg.pir |= INTR_FIXOFL;
+                  info ("FIXOFL on long division, op0=%lld op1=%lld", lop0, lop1);
+                }
+              else
                 {
                   long long rem = lop0 % lop1;
                   laccu = lop0 / lop1;
@@ -375,18 +366,6 @@ arith (operation_kind operation,
                     laccu--;
                   else if (rem > 0LL && lop0 < 0LL)
                     laccu++;
-                }
-
-              if (lop1 == 0LL ||
-                  ((unsigned long long) lop0 == 0xFFFFFFFF80000000ULL
-                   && lop1 == -1LL))
-                {
-                  simreg.pir |= INTR_FIXOFL;
-                  info ("FIXOFL on long division, op0=%lld op1=%lld res=%lld",
-                        lop0, lop1, laccu);
-                }
-              else        /* Put this in an "else" part because */
-                {         /* laccu is otherwise undefined */
                   operand0[0] = (short) (laccu >> 16);
                   operand0[1] = (short) (laccu & 0xFFFFLL);
                   update_cs (operand0, VAR_LONG);
