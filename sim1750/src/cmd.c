@@ -78,7 +78,7 @@ static int   leave = 0;			/* leave command interpreter */
 
 #define P (int argc, char *argv[])
 static int co_batch P, co_logopen P, co_logclose P, co_sh P, co_exit P;
-static int co_echo P, co_help P, co_info P, co_speed P;
+static int co_echo P, co_help P, co_info P, co_speed P, co_timers P;
 static int co_version P, co_shoc P, co_war P;
 static int si_dispreg P, si_disasm P, si_dispmem P, si_dispflt P;
 static int si_dispeflt P, si_dispchar P, si_changemem P, si_changereg P;
@@ -282,6 +282,9 @@ static const struct {
        "system command (e.g. Unix/DOS: exit ; VMS : logout) After exiting\n"
        "the shell, the user is returned into the simulator in its same\n"
        "state as prior to the 'sh' command." },
+   { "timers [off|on]",        co_timers,   "switch timers A/B off or on",
+       "On startup, the timers are on.\n"
+       "If no argument is given to the command then the on/off state is toggled." },
    { "conditions",             co_shoc,     "show software copying policy",
        "The GNU General Public License is displayed." },
    { "warranty",               co_war,      "show warranty information",
@@ -808,6 +811,24 @@ co_speed (int argc, char *argv[])
       "",
 #endif
       need_speed ? "dis" : "en");
+  return (OKAY);
+}
+
+static int
+co_timers (int argc, char *argv[])
+{
+  if (argc > 1)
+    {
+      if (eq (argv[1], "on"))
+	disable_timers = TRUE;
+      else if (eq (argv[1], "off"))
+	disable_timers = FALSE;
+      else
+	return error ("invalid parameter -- must be 'on' or 'off'");
+    }
+  else
+    disable_timers = ! disable_timers;
+  info ("Timers A/B are now %sabled", disable_timers ? "dis" : "en");
   return (OKAY);
 }
 

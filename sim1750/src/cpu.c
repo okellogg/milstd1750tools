@@ -53,6 +53,7 @@ uint instcnt;		     /* Total number of instructions executed */
 struct regs simreg;	     /* The 1750 register file */
 int   bpindex = -1;	     /* Index of breakpoint when hitting one */
 			     /* (unused in BSVC) */
+bool  disable_timers = 0;
 
 /* Total execution time in uSec since go command */
 double total_time_in_us = 0.0;
@@ -137,6 +138,9 @@ workout_timing (int cycles)
 #else
 #define TIMER_A_LIMIT_IN_NS 10000
 #endif
+
+  if (disable_timers)
+    return;
 
   one_tatick_in_ns += uP_CYCLE_IN_NS * cycles;
 
