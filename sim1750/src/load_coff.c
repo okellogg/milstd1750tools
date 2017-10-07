@@ -612,7 +612,7 @@ dump_strings ()
       char *ptr = str_tab;
       do
          {
-           printf ("%08X : %s\n", (ptr - str_tab), ptr);
+           printf ("%p : %s\n", (void*)(ptr - str_tab), ptr);
            while (*ptr++ != '\0')
              ;
          }
