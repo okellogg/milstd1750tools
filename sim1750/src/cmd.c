@@ -820,9 +820,9 @@ co_timers (int argc, char *argv[])
   if (argc > 1)
     {
       if (eq (argv[1], "on"))
-	disable_timers = TRUE;
-      else if (eq (argv[1], "off"))
 	disable_timers = FALSE;
+      else if (eq (argv[1], "off"))
+	disable_timers = TRUE;
       else
 	return error ("invalid parameter -- must be 'on' or 'off'");
     }
@@ -1495,13 +1495,15 @@ get_repfact (char *s, int *num)
 {
   *num = 0;
   if (! isdigit (*s))
-    if (*s != '(')
-      return NULL;
-    else
-      {
-	*num = 1;  /* default when no repeat factor given */
-	return s;
-      }
+    {
+      if (*s != '(')
+        return NULL;
+      else
+        {
+          *num = 1;  /* default when no repeat factor given */
+          return s;
+        }
+    }
   while (isdigit (*s))
     *num = 10 * *num + *s++ - '0';
   if (*s != '(')
@@ -1518,12 +1520,16 @@ find_closing (char *s)
   while (*++s)
     {
       if (*s == '(')
-	paren_level++;
+        {
+          paren_level++;
+        }
       else if (*s == ')')
-	if (paren_level == 0)
-	  return s;
-	else
-	  paren_level--;
+        {
+          if (paren_level == 0)
+            return s;
+          else
+            paren_level--;
+        }
     }
   return NULL;
 }
