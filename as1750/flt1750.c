@@ -55,8 +55,8 @@ from_1750flt (short *input)	/* input : array of 2 shorts */
   signed char int_exp;
 
   int_exp = (signed char) (input[1] & 0xFF);
-  int_mant = ((int) input[0] << 8) | (((int) input[1] & 0xFF00L) >> 8);
-  /* printf("int_mant = 0x%08lx\n",int_mant); */
+  int_mant = ((int) input[0] << 8) | (((int) input[1] & 0xFF00) >> 8);
+  /* printf("int_mant = 0x%08x\n",int_mant); */
   flt_mant = (double) int_mant / FLOATING_TWO_TO_THE_TWENTYTHREE;
   flt_exp = pow2 (int_exp);
   return flt_mant * flt_exp;
@@ -83,7 +83,7 @@ to_1750flt (double input, short output[2])
 
   mant = (int) (input * FLOATING_TWO_TO_THE_THIRTYONE);
 
-  /* printf("\n\tmant=%08lx\n",mant); */
+  /* printf("\n\tmant=%08x\n",mant); */
   output[0] = (short) (mant >> 16);
   output[1] = (short) (mant & 0xFF00) | (exp & 0xFF);
 
@@ -99,8 +99,8 @@ from_1750eflt (short *input)	/* input : array of 3 shorts */
 
   int_exp = (signed char) (input[1] & 0xFF);
 
-  int_mant_hi = (((int) input[0] << 16) | ((int) input[1] & 0xFF00L)) >> 8;
-  int_mant_lo = ((int) input[2] & 0xFFFFL);
+  int_mant_hi = (((int) input[0] << 16) | ((int) input[1] & 0xFF00)) >> 8;
+  int_mant_lo = ((int) input[2] & 0xFFFF);
 
   flt_mant = (double) int_mant_hi / FLOATING_TWO_TO_THE_TWENTYTHREE
     + (double) int_mant_lo / FLOATING_TWO_TO_THE_THIRTYNINE;

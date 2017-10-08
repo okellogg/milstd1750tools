@@ -297,7 +297,7 @@ si_lo (int argc, char *argv[])
   FILE *fpoint;
   char lline[132], *filename = argv[1];
   bool verbose_save = verbose;
-  int retval;
+  int retval = ERROR;
 
   if (argc <= 1)
     return error ("filename missing");

@@ -1,21 +1,18 @@
 CC = gcc
 
-#CFLAGS =  -g -Wall -D__STDC__=0 -DAS1750 -DSTRCASECMP -DSTRNCASECMP  -DSTRDUP
-CFLAGS =  -g -Wall -DAS1750 -DSTRCASECMP -DSTRNCASECMP  -DSTRDUP
-#CFLAGS =  -g -Xa -DAS1750 -DSTRCASECMP -DSTRNCASECMP  -DSTRDUP
+CFLAGS =  -g -Og -Wall -DAS1750 -DHAVE_UTYPES -DSTRCASECMP -DSTRNCASECMP
+#		Define -DHAVE_UTYPES if <sys/types.h> defines ushort/uint
 # 		Define the STR... stuff only if <string.h> has these
 
 LDFLAGS = -g -lm
 
 SRC =	  utils.c mexpr.c syms.c tekhex.c tldldm.c as1750.c main.c flt1750.c
-OBJ =	  utils.o mexpr.o syms.o tekhex.o tldldm.o as1750.o main.o flt1750.o
+OBJ =	  $(SRC:%.c=%.o)
 
 # Make the program
 as1750: ${OBJ}
 	${CC} -o as1750 ${OBJ} ${LDFLAGS}
 
-.c.o:
-	${CC} -c ${DEFS} ${CPPFLAGS} ${CFLAGS} $<
 
 # Dependencies
 flt1750.o:  flt1750.c
@@ -31,6 +28,3 @@ main.o:     main.c     type.h syms.h common.h version.h
 clean:
 	rm -f ${OBJ} as1750
 
-# DASA specific
-dasa:
-	@$(MAKE) "CFLAGS= $(CFLAGS) -I/usr/local/include -I."

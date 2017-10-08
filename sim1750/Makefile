@@ -58,13 +58,13 @@ profile: $(OBJECTS)
 	$(CC) -p -o $(PROJ_DIR)/sim $(OBJECTS)
 
 debug:
-	@$(MAKE) "CFLAGS= -g -Wall $(CFLAGS)"
+	@$(MAKE) "CFLAGS= -g -Og -Wall $(CFLAGS)"
 
 opt:
 	@$(MAKE) "CFLAGS= -O $(CFLAGS)"
 
 clean:
-	rm $(OBJ)/*.o $(PROJ_DIR)/sim1750
+	$(RM) $(OBJ)/*.o $(PROJ_DIR)/sim1750
 
 
 #  now dependencies of objects from sources

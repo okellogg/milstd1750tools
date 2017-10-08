@@ -12,7 +12,7 @@ typedef struct symbol {
 	 bool      is_export;
 	 byte      namelen;
 	 char      *name;
-	 long      value;  /* if is_constant, then value; else address */
+	 int       value;  /* if is_constant, then value; else address */
 	 short     reserve;  /* reserved size in COMMONs */
 	 struct symbol *left, *right;  /* alphabetical order of symbol names */
    } *symbol_t;

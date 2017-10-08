@@ -124,7 +124,7 @@ enter_symbol (char *s)
   sym->is_constant = FALSE;
   sym->is_referenced = FALSE;
   sym->is_export = FALSE;
-  sym->value = 0L;
+  sym->value = 0;
   sym->reserve = 0;
 
   return sym;
@@ -192,7 +192,7 @@ print_symbol (symbol_t sym)
 	  return;
 	}
     }
-  printf ("%c %06lX %s\n", section_name[objblk[sym->frag_index].section],
+  printf ("%c %06X %s\n", section_name[objblk[sym->frag_index].section],
 	  sym->value, sym->name);
 }
 

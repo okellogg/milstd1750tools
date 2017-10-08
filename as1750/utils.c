@@ -304,7 +304,7 @@ skip_symbol (char *s)
 int
 get_nibbles (char *src, int n_nibbles)
   /* Convert n-digit (1 <= n <= 8) hex string to number. */
-  /* Returns -1L on error, else a number in the range 0 .. 0x7FFFFFFF. */
+  /* Return -1 on error, else a number in the range 0 .. 0x7FFFFFFF. */
   /* Of course, this means that for (n = 8), the most significant bit
      (sign bit) can not be used, so the maximum readable bitwidth is 31. */
 {
@@ -314,7 +314,7 @@ get_nibbles (char *src, int n_nibbles)
   while (n_nibbles-- > 0)
     {
       if ((i = xtoi (*src++)) == -1)
-	return -1L;
+	return -1;
       outnum = (outnum << 4) | i;
     }
   return outnum;
@@ -322,7 +322,7 @@ get_nibbles (char *src, int n_nibbles)
 
 
 void
-put_nibbles (char *dst, ulong src, int n_nibbles)
+put_nibbles (char *dst, uint src, int n_nibbles)
 {
   int nibble;
 

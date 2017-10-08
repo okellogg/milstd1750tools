@@ -2,10 +2,10 @@
 
 #include "type.h"
 
-extern void     emit_tldword (ulong startaddr, ushort word);
+extern void     emit_tldword (uint startaddr, ushort word);
 extern void     finish_tldline ();
 extern unsigned create_tldfile (char *outfname);
-extern void     close_tldfile (ulong transfer_address);
+extern void     close_tldfile (uint transfer_address);
 
 
 struct pagereg_assignment   /* stuff for the ASSIGN statement */

@@ -55,7 +55,7 @@ int n_frags = 4;		/* Init,Normal,Konst,Static are always there */
 struct macro_symbol macsym[MAX_MACSYMS];
 int n_macsyms = 0;
 
-static ulong transfer_address;	/* set by option "-t"; default: code_startaddr */
+static uint transfer_address;	/* set by option "-t"; default: code_startaddr */
 
 bool case_sensitive = FALSE;	/* symbol-name case sensitivity; option: -S */
 
@@ -290,9 +290,9 @@ bool llmflag = FALSE;
 
 static status (*createfile[]) (char *) =
   { create_tekfile, create_tldfile };
-static void (*closefile[]) (ulong) =
+static void (*closefile[]) (uint) =
   { close_tekfile, close_tldfile };
-static void (*emitword[]) (ulong, ushort) =
+static void (*emitword[]) (uint, ushort) =
   { emit_tekword, emit_tldword };
 static void (*finishline[]) () =
   { finish_tekline, finish_tldline };
@@ -381,7 +381,7 @@ bool list_before_reloc = FALSE, list_after_reloc = FALSE, list_symbols = FALSE;
 section_t curr_sect;
 
 static void
-do_output (int obj_index, ulong address)
+do_output (int obj_index, uint address)
 {
   int i, dspl;
   struct reloc *rel;
@@ -410,7 +410,7 @@ do_output (int obj_index, ulong address)
 			   rel->sym->name);
 		  exit (EXIT_FAILURE);
 		}
-	      dspl = (int) (rel->sym->value - (long) address);
+	      dspl = (int) (rel->sym->value - (int)address);
 	      if (dspl < -128 || dspl > 127)
 		{
 		  if (j_to_jc (file[rel->sym->defining_file].name,
@@ -468,7 +468,7 @@ do_output (int obj_index, ulong address)
 		      lp->linenum);
 	  else
 	    {
-	      dsprintf (listline, "%07lX:  %04hX           %5hd.  ",
+	      dsprintf (listline, "%07X:  %04hX           %5hd.  ",
 			address, word, lp->linenum);
 	      if (lp->label != NULL)
 		dsprintf (listline, "%-15.15s ", lp->label);
@@ -492,7 +492,7 @@ do_output (int obj_index, ulong address)
 	}
       else
 	{
-	  ulong long_word = (ulong) word;
+	  uint long_word = (uint) word;
 	  put_nibbles (listline + 10 + (n_words_seen * 5), long_word, 4);
 	  if (++n_words_seen >= min (lp->n_words, 3))
 	    {
@@ -541,7 +541,7 @@ relocate_symbol (symbol_t sym)
 	  if ((export_file = fopen (exportfname, "w")) == (FILE *) 0)
 	    problem ("cannot open export file");
 	}
-      fprintf (export_file, "%-40s %07lX\n", sym->name, sym->value);
+      fprintf (export_file, "%-40s %07X\n", sym->name, sym->value);
     }
 }
 
@@ -573,7 +573,7 @@ relocate_and_write_output (char *outfname)
   objblk[Normal].start_address = objblk[Init].start_address
 			       + objblk[Init].n_used;
   for (i = Konst; i <= Static; i++)
-    if (objblk[i].start_address == -1L)
+    if (objblk[i].start_address == -1)
       objblk[i].start_address = objblk[i-1].start_address + objblk[i-1].n_used;
 
   /* Relocate symbols. */
@@ -592,7 +592,7 @@ relocate_and_write_output (char *outfname)
       struct objblock *obj = &objblk[curr_frag];
       if (obj->n_used > 0)
 	{
-	  ulong reloc_addr = obj->start_address;
+	  uint reloc_addr = obj->start_address;
 	  for (i = 0; i < obj->n_used; i++)
 	    do_output (i, reloc_addr++);
 	  finish_line ();
@@ -721,12 +721,12 @@ get_line ()
 }
 
 
-/* Auxiliary to DATAL: same as get_num, only for datatype `long'.
-   Returns pointer to first char after the number consumed,
+/* Auxiliary to DATAL: same as get_num but for 1750 `long'.
+   Returns pointer to first char after the number consumed
    or NULL on error. */
 
 static char *
-get_long (char *s, long *outnum)
+get_long (char *s, int *outnum)
 {
   bool is_neg = FALSE, intel = FALSE, c_lang = FALSE, tld = FALSE;
   char *start;
@@ -913,8 +913,8 @@ assemble_line (int curr_macro, char **macparm, int n_macparms)
 	    return ERROR;
 	  sym->defining_file = curr_file;
 	  sym->frag_index = curr_frag;
-	  sym->value = (long) objblk[curr_frag].n_used;
-	  if (objblk[curr_frag].start_address >= 0L)
+	  sym->value = objblk[curr_frag].n_used;
+	  if (objblk[curr_frag].start_address >= 0)
 	    {			/* ORG or explicit start address */
 	      sym->is_orged = TRUE;
 	      sym->value += objblk[curr_frag].start_address;
@@ -980,9 +980,9 @@ assemble_line (int curr_macro, char **macparm, int n_macparms)
 	  ushort *opcode = objblk[curr_frag].data + addr;
 	  struct reloc *rel;
 
-	  if (objblk[curr_frag].start_address >= 0L)	/* ORGed */
-	    printf ("%05lX:", objblk[curr_frag].start_address
-		    + (long) objblk[curr_frag].n_used - (long) n_words);
+	  if (objblk[curr_frag].start_address >= 0)	/* ORGed */
+	    printf ("%05X:", objblk[curr_frag].start_address
+		    + objblk[curr_frag].n_used - n_words);
 	  else
 	    printf ("r%04X:", addr);
 	  printf ("\t%04hX", *opcode);
@@ -1172,14 +1172,14 @@ non_opcode:
       if (sym->defining_file < 0)
 	{
 	  sym->defining_file = curr_file;
-	  if (objblk[Static].start_address >= 0L)	/* ORGed */
+	  if (objblk[Static].start_address >= 0)	/* ORGed */
 	    {
 	      sym->is_orged = TRUE;
 	      sym->value = objblk[Static].start_address
-			   + (long) objblk[Static].n_used;
+			   + objblk[Static].n_used;
 	    }
 	  else
-	    sym->value = (long) objblk[Static].n_used;
+	    sym->value = objblk[Static].n_used;
 	  sym->frag_index = Static;
 	  sym->reserve = 1;
 	}
@@ -1217,7 +1217,7 @@ non_opcode:
 		return error ("rhs expression of EQU too complex");
 	    }
 	  sym->is_constant = TRUE;
-	  sym->value = (long) factor;	/* previous value is overridden */
+	  sym->value = factor;	/* previous value is overridden */
 	}
       seen_symdef = FALSE;
       done;
@@ -1242,7 +1242,7 @@ non_opcode:
 
   if (eq (operation, "DATAL") || eq (operation, ".LONG"))
     {
-      long lng;
+      int lng;
 
       if (! seen_symdef)
 	error ("DATAL directive without previous symbol definition");
@@ -1672,12 +1672,12 @@ bool debug_alloc = FALSE;
    Konst   after end of Normal
    Static  after end of Konst
  */
-static long code_startaddr = 0x0100L;
+static int code_startaddr = 0x0100;
    /* Default when no explicit value supplied */
-static long konst_startaddr = -1L;
+static int konst_startaddr = -1;
    /* -1 indicates to put Konst after end of */
    /* Normal when no explicit value supplied */
-static long static_startaddr = -1L;
+static int static_startaddr = -1;
    /* -1 indicates to put Static after end of */
    /* Konst when no explicit value supplied */
 
@@ -1771,7 +1771,7 @@ main (int argc, char *argv[])
 		}
 	      break;
 	    case 'c':		/* code start address */
-	      sscanf (nextarg, "%lx", &code_startaddr);
+	      sscanf (nextarg, "%x", &code_startaddr);
 	      transfer_address = code_startaddr;
 	      break;
 	    case 'e':		/* explicit export file name */
@@ -1781,7 +1781,7 @@ main (int argc, char *argv[])
 	      {
 		FILE *import_file;
 		static char buf[100], symname[80];
-		long symvalue;
+		int symvalue;
 		symbol_t sym;
 
 		strcpy (buf, nextarg);
@@ -1791,7 +1791,7 @@ main (int argc, char *argv[])
 		  {
 		    if (fgets (buf, 100, import_file) == NULL)
 		      break;
-		    sscanf (buf, "%s %lx", symname, &symvalue);
+		    sscanf (buf, "%s %x", symname, &symvalue);
 		    if ((sym = find_or_enter (symname)) == SNULL)
 		      problem ("fatal error while entering import symbol");
 		    sym->value = symvalue;
@@ -1803,7 +1803,7 @@ main (int argc, char *argv[])
 	      }
 	      break;
 	    case 'k':		/* constant data start address */
-	      sscanf (nextarg, "%lx", &konst_startaddr);
+	      sscanf (nextarg, "%x", &konst_startaddr);
 	      break;
 	    case 'o':		/* explicit output file name */
 	      strcpy (outfname, nextarg);
@@ -1832,7 +1832,7 @@ main (int argc, char *argv[])
 	      }
 	      break;
 	    case 's':		/* read/write data start address */
-	      sscanf (nextarg, "%lx", &static_startaddr);
+	      sscanf (nextarg, "%x", &static_startaddr);
 	      break;
 	    case 't':
 	      sscanf (nextarg, "%x", &transfer_address);
@@ -1874,7 +1874,7 @@ main (int argc, char *argv[])
   objblk[0].start_address = code_startaddr;
   objblk[1].name = "Normal";
   objblk[1].section = Normal;
-  objblk[1].start_address = -1L;	/* ...see relocate_and_wr... */
+  objblk[1].start_address = -1;  /* ...see relocate_and_wr... */
   objblk[2].name = "Konst";
   objblk[2].section = Konst;
   objblk[2].start_address = konst_startaddr;
@@ -1953,12 +1953,12 @@ main (int argc, char *argv[])
 	  < objblk[i].start_address + objblk[i].n_used)
 	{
 	  fprintf (stderr,
-	      "link: %s at start address 0x%lX (length %d) overlaps with\n",
+	      "link: %s at start address 0x%X (length %d) overlaps with\n",
 		   (objblk[i + 1].name != NULL) ? objblk[i + 1].name :
 		   objblk[objblk[i + 1].section].name,
 		   objblk[i + 1].start_address, objblk[i + 1].n_used);
 	  fprintf (stderr,
-		   "      %s at start address 0x%lX (length %d)\n",
+		   "      %s at start address 0x%X (length %d)\n",
 		   (objblk[i].name != NULL) ? objblk[i].name :
 		   objblk[objblk[i].section].name,
 		   objblk[i].start_address, objblk[i].n_used);

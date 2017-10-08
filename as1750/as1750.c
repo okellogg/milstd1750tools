@@ -28,31 +28,10 @@
 /*                                                                         */
 /***************************************************************************/
 
-#ifdef AS1750
 #include "common.h"
 #include "utils.h"
-#else /* ASL */
-#include <stdio.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <string.h>
-#include "datatypes.h"
-#include "asmdef.h"
-#include "asmsub.h"
-#include "asmpars.h"
-#include "as1750.h"
-#define bool      char
-#define ushort    unsigned short
-#define ulong     unsigned int
-#define status    unsigned
-#define dtoi(ascii_char) (ascii_char - '0')
-#endif
 
-
-#ifndef AS1750
-static
-#endif
-  status			/* Output an error text (printf style). */
+status			/* Output an error text (printf style). */
 error (char *layout,...)	/*  Return the ERROR status code. */
 {
   va_list vargu;
@@ -60,12 +39,8 @@ error (char *layout,...)	/*  Return the ERROR status code. */
 
   va_start (vargu, layout);
   vsprintf (output_line, layout, vargu);
-#ifdef AS1750
   fprintf (stderr, "%s line%5d: %s\n", nopath (file[curr_file].name),
 	   file[curr_file].line_number, output_line);
-#else /* ASL */
-  WrErrorString (output_line, "\0", 0, 0);
-#endif
   va_end (vargu);
   return ERROR;
 }
@@ -76,8 +51,6 @@ error (char *layout,...)	/*  Return the ERROR status code. */
  * Will also read character constants of the form: 'x', and two-character
  * packed strings of the form "xy" (where x=>highbyte,y=>lowbyte.)
  */
-
-#ifdef AS1750
 
 char *
 get_num (char *s, int *outnum)
@@ -388,10 +361,10 @@ parse_addr (char *s)
 		{
 		  if (sym1->is_constant)
 		    {
-		      long sum = sym->value + sym1->value;
-		      if (sum < -0x8000L)
+		      int sum = sym->value + sym1->value;
+		      if (sum < -0x8000)
 			return error ("negative overflow in symbol addition");
-		      else if (sum > 0xFFFFL)
+		      else if (sum > 0xFFFF)
 			return error ("positive overflow in symbol addition");
 		      add_word ((ushort) sum);
 		    }
@@ -419,10 +392,10 @@ parse_addr (char *s)
 		{
 		  if (sym1->is_constant)
 		    {
-		      long dif = sym->value - sym1->value;
-		      if (dif < -0x8000L)
+		      int dif = sym->value - sym1->value;
+		      if (dif < -0x8000)
 			return error ("negative overflow in symbol subtraction");
-		      else if (dif > 0xFFFFL)
+		      else if (dif > 0xFFFF)
 			return error ("positive overflow symbol subtraction");
 		      add_word ((ushort) dif);
 		    }
@@ -455,10 +428,10 @@ parse_addr (char *s)
 	    return ERROR;
 	  if (sym->is_constant)
 	    {
-	      long sum = sym->value + (long) num;
-	      if (sum < -32768L)
+	      int sum = sym->value + num;
+	      if (sum < -32768)
 		return error ("neg. overflow in symbolic expression");
-	      else if (sum > 65535L)
+	      else if (sum > 65535)
 		return error ("overflow in symbolic expression");
 	      add_word ((ushort) sum);
 	    }
@@ -493,7 +466,7 @@ parse_addr (char *s)
 	  *p = c;
 	  s = p;
 	  if (sym->is_constant)
-	    add_word ((ushort) (sym->value + (long) num));
+	    add_word ((ushort) (sym->value + num));
 	  else
 	    {
 	      add_reloc (sym);
@@ -504,36 +477,6 @@ parse_addr (char *s)
   return OKAY;
 }
 
-#else /* ASL */
-
-static char *
-get_sym_num (char *s, int *outnum)
-{
-  Boolean okay;
-  *outnum = (int) EvalIntExpression (s, Int16, &okay);
-  if (!okay)
-    return NULL;
-  return (s + strlen (s));	/* Any non-NULL value will do here. */
-}
-
-
-#define add_word(word)  WAsmCode[CodeLen++]=word
-
-static status
-parse_addr (char *s)
-{
-  int value;
-  Boolean okay;
-  value = (int) EvalIntExpression (s, Int16, &okay);
-  if (!okay)
-    return ERROR;
-  add_word ((ushort) value);
-  return OKAY;
-}
-
-#endif /* from #else of #ifdef AS1750 */
-
-/* From here on, everything is identical between as1750 and ASL. */
 
 static ushort
 get_num_bounded (char *s, int lowlim, int highlim)
@@ -586,11 +529,7 @@ check_indexreg ()
 	return ERROR;
       if (rx == 0)
 	return error ("R0 not an index register");
-#ifdef AS1750
       objblk[curr_frag].data[objblk[curr_frag].n_used - 2] |= rx;
-#else /* ASL */
-      WAsmCode[0] |= rx;
-#endif
     }
   return OKAY;
 }
@@ -659,11 +598,7 @@ as_xmem (ushort oc)		/* MIL-STD-1750B extended mem. addr. */
       ushort rx;
       if ((rx = get_regnum (arg[2])) == ERROR)
 	return ERROR;
-#ifdef AS1750
       objblk[curr_frag].data[objblk[curr_frag].n_used - 2] |= rx;
-#else /* ASL */
-      WAsmCode[0] |= rx;
-#endif
     }
   return 2;
 }
@@ -731,16 +666,13 @@ as_is (ushort oc)
 static ushort
 as_icr (ushort oc)
 {
-#ifdef AS1750
   struct objblock *obj = &objblk[curr_frag];
   int last = obj->n_used;
-#endif
   if (n_args != 1)
     return error ("incorrect number of operands");
   if (parse_addr (arg[0]))
     return ERROR;
-#ifdef AS1750
-  /* If symbol relocation, then set the relocation type to Byte_Reloc */
+  /* If symbol relocation then set the relocation type to Byte_Reloc */
   if (relblk.n_used > 0)
     {
       struct reloc *rel = &relblk.data[relblk.n_used - 1];
@@ -749,17 +681,6 @@ as_icr (ushort oc)
     }
   obj->data[last] &= 0x00FF;
   obj->data[last] |= oc;
-#else /* ASL */
-  {
-    const short target = (short) WAsmCode[0];
-    const long curr_pc = (long) EProgCounter () & 0xFFFFL;
-    const long diff = (long) target - curr_pc;
-    if (diff < -128L || diff > 127L)
-      return error
-	("address distance too large in Instruction Counter Relative operation");
-    WAsmCode[0] = oc | (ushort) (diff & 0xFFL);
-  }
-#endif
   return 1;
 }
 

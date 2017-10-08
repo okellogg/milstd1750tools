@@ -5,8 +5,8 @@
 
 #include <sys/types.h>
 
-/* If you get "undefined type" errors about uint / ushort / uchar
-   then change the #if 0 to #if 1 below:                       */
+/* If you get "undefined type" errors about uint / ushort
+   then remove -DHAVE_UTYPES from CFLAGS in the Makefile.      */
 #ifndef HAVE_UTYPES
 # ifndef uint
 #  define uint    unsigned int
@@ -14,11 +14,11 @@
 # ifndef ushort
 #  define ushort  unsigned short
 # endif
-# ifndef uchar
-#  define uchar   unsigned char
-# endif
 #endif
 
+#ifndef uchar
+# define uchar   unsigned char
+#endif
 #ifndef byte
 #define byte    unsigned char
 #endif

@@ -50,8 +50,8 @@ struct objblock {
 	 int       n_used;
 	 char      *name;
 	 section_t section;
-	 long      start_address;
-/* when start_address is -1L, use default linking mechanism (see main.c):
+	 int       start_address;
+/* when start_address is -1 use default linking mechanism (see main.c):
    Init   at 0x00100
    Normal at Init + sizeof(Init)
    Konst  at Normal + sizeof(Normal)
