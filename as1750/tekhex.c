@@ -232,7 +232,7 @@ close_tekfile (ulong transfer_address)
 {
   finish_tekline ();
   /* Termination Block */
-  sprintf (tekline, "%%0B8xx5%05uX\n", transfer_address * 2);
+  sprintf (tekline, "%%0B8xx5%05lX\n", (unsigned long)transfer_address * 2);
   put_nibbles (tekline + 4, (ulong) check_tekline (tekline), 2);
   fputs (tekline, fp);
   fclose (fp);
