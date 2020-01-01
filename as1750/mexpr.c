@@ -36,6 +36,7 @@
 #include "macsym.h"
 
 extern char *get_num ();
+extern char *get_sym_num ();
 extern status error ();
 
 #define NEW(type) ((type *) myalloc (sizeof (type)))
@@ -108,8 +109,7 @@ evaluate (char *expr)
 /* Return a VALUE for I.  */
 
 static VALUE *
-int_value (i)
-     int i;
+int_value (int i)
 {
   VALUE *v;
 
@@ -122,8 +122,7 @@ int_value (i)
 /* Return a VALUE for S.  */
 
 static VALUE *
-str_value (len)
-     int len;
+str_value (int len)
 {
   VALUE *v;
 
@@ -137,8 +136,7 @@ str_value (len)
 /* Free VALUE V, including structure components.  */
 
 static void
-freev (v)
-     VALUE *v;
+freev (VALUE *v)
 {
 /*
    if (v->type == string)
@@ -150,8 +148,7 @@ freev (v)
 /* Return nonzero if V is a null-string or zero-number.  */
 
 static int
-null (v)
-     VALUE *v;
+null (VALUE *v)
 {
   switch (v->type)
     {
@@ -168,8 +165,7 @@ null (v)
 /* Return nonzero if V is a string value.  */
 
 static int
-isstring (v)
-     VALUE *v;
+isstring (VALUE *v)
 {
   return v->type == string;
 }
@@ -200,8 +196,7 @@ tostring (v)
 /* Coerce V to an integer value.  Return 1 on success, 0 on failure.  */
 
 static int
-toarith (v)
-     VALUE *v;
+toarith (VALUE *v)
 {
   int i;
 
@@ -210,7 +205,7 @@ toarith (v)
     case integer:
       return 1;
     case string:
-      if (get_num (v->u.s, &i) == NULL)
+      if (get_sym_num (v->u.s, &i) == NULL)
 	return 0;
 /*    free (v->u.s); */
       v->u.i = i;
@@ -226,8 +221,7 @@ toarith (v)
    STR must not be NULL.  */
 
 static int
-nextarg (str)
-     char *str;
+nextarg (char *str)
 {
   int len = strlen (str), match;
 
@@ -278,7 +272,7 @@ cmpf (greater_than, >)
 
 #define arithf(name, op)                        \
 static                                          \
-int name (l, r) VALUE *l; VALUE *r;             \
+int name (VALUE *l, VALUE *r)                   \
 {                                               \
   if (!toarith (l) || !toarith (r))             \
     error ("evaluate: non-numeric argument");   \
@@ -297,7 +291,7 @@ int name (l, r) VALUE *l; VALUE *r;             \
 
 #define unaryf(name, op)                        \
 static                                          \
-int name (l) VALUE *l;                          \
+int name (VALUE *l)                             \
 {                                               \
   if (!toarith (l))                             \
     error ("evaluate: non-numeric argument");   \
@@ -325,8 +319,8 @@ unaryf (lnot, !)
 
 /* Handle bare operands and ( expr ) syntax.  */
 
-     static VALUE *
-       eval9 ()
+static VALUE *
+eval9 ()
 {
   VALUE *v = (VALUE *) 0;
   char buf[16];
@@ -422,7 +416,7 @@ eval8 ()
 	    return l;
 	  }
 	argp++;
-	if (!nextarg (')'))
+	if (!nextarg (")"))
 	  {
 	    error ("eval8: expecting closing parenth at ORD");
 	    return l;
