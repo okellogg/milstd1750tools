@@ -1,8 +1,12 @@
 CC = gcc
 
-CFLAGS =  -g -Og -Wall -DAS1750 -DHAVE_UTYPES -DSTRCASECMP -DSTRNCASECMP
+CFLAGS =  -g -Wall -DAS1750 -DHAVE_UTYPES -DSTRCASECMP -DSTRNCASECMP
 #		Define -DHAVE_UTYPES if <sys/types.h> defines ushort/uint
 # 		Define the STR... stuff only if <string.h> has these
+
+ifneq ($(debug),1)
+  CFLAGS += -Og
+endif
 
 LDFLAGS = -g -lm
 
