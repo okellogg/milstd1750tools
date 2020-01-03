@@ -41,6 +41,7 @@
 #define DBL_1750_MIN         \
  1.469367938527859384960920671527807097273331945965109401885939632848E-39
 
+bool update_pir = TRUE;  /* evaluated in function arith() */
 
 /************* utilities for Condition Status in the Status Word *************/
 
@@ -173,12 +174,15 @@ arith (operation_kind operation,
 
             if (sign_comparison && (uop0 & 0x8000) != (uaccu & 0x8000))
               {
-                int lop0 = (int) *operand0, lop1 = (int) *operand1;
                 simreg.sw |= CS_CARRY;
-                simreg.pir |= INTR_FIXOFL;
-                info ("FIXOFL on integer %s, op0=%hd op1=%hd res=%d",
-                      is_add ? "ADD" : "SUB", *operand0, *operand1,
-                      is_add ? lop0 + lop1 : lop0 - lop1);
+                if (update_pir)
+                  {
+                    simreg.pir |= INTR_FIXOFL;
+                    int lop0 = (int) *operand0, lop1 = (int) *operand1;
+                    info ("FIXOFL on integer %s, op0=%hd op1=%hd res=%d",
+                          is_add ? "ADD" : "SUB", *operand0, *operand1,
+                          is_add ? lop0 + lop1 : lop0 - lop1);
+                  }
               }
 
             operand0[0] = uaccu;

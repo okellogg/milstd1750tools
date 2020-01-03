@@ -1743,7 +1743,9 @@ ex_soj ()		/* 73xy */
   int jump_taken = 0;
 
   help = 1;
+  update_pir = FALSE;
   arith (ARI_SUB, VAR_INT, &simreg.r[upper], &help);
+  update_pir = TRUE;
 
   if (CS_ZERO & simreg.sw)
     simreg.ic += 2;                     /* end of loop */
