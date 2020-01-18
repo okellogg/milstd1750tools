@@ -88,7 +88,7 @@ struct relblock {
 #define MAX_MACPARMS 16
 
 /* input file information */
-#define MAX_FILES 20
+#define MAX_FILES 200
 struct fileinfo {
 	char *name;
 	FILE *fp;
