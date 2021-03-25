@@ -35,7 +35,6 @@
 #include "flt1750.h"
 #include <math.h>
 #define dfrexp     frexp
-#define pow2(exp)  pow(2.0,(double)exp)
 
 #define ushort unsigned short
 #define uint   unsigned int
@@ -46,20 +45,25 @@
 #define FLOATING_TWO_TO_THE_THIRTYNINE  549755813888.0
 
 
+static double pow2(int exp)
+{
+  return pow(2.0, (double)exp);
+}
 
 double
 from_1750flt (short *input)	/* input : array of 2 shorts */
 {
   int int_mant;
-  double flt_mant, flt_exp;
+  double flt_exp;
   signed char int_exp;
 
   int_exp = (signed char) (input[1] & 0xFF);
   int_mant = ((int) input[0] << 8) | (((int) input[1] & 0xFF00) >> 8);
   /* printf("int_mant = 0x%08lx\n",int_mant); */
-  flt_mant = (double) int_mant / FLOATING_TWO_TO_THE_TWENTYTHREE;
-  flt_exp = pow2 (int_exp);
-  return flt_mant * flt_exp;
+
+  flt_exp = pow2 ((int)int_exp - 23);
+
+  return (double)int_mant * flt_exp;
 }
 
 int
@@ -94,20 +98,18 @@ double
 from_1750eflt (short *input)	/* input : array of 3 shorts */
 {
   int int_mant_hi, int_mant_lo;
-  double flt_mant, flt_exp;
+  double flt_mant, flt_exp, expr_hi, expr_lo;
   signed char int_exp;
 
   int_exp = (signed char) (input[1] & 0xFF);
 
-  int_mant_hi = (((int) input[0] << 8) | ((int) input[1] & 0xFF00)) >> 8;
+  int_mant_hi = ((int) input[0] << 8) | (((int) input[1] & 0xFF00) >> 8);
   int_mant_lo = ((int) input[2] & 0xFFFF);
 
-  flt_mant = (double) int_mant_hi / FLOATING_TWO_TO_THE_TWENTYTHREE
-    + (double) int_mant_lo / FLOATING_TWO_TO_THE_THIRTYNINE;
-  flt_exp = pow2 (int_exp);
-/*  printf ("\tfrom: mant=%.12g, exp=%g\n", flt_mant, flt_exp);  */
+  expr_hi = (double)int_mant_hi * pow2((int)int_exp - 23);
+  expr_lo = (double)int_mant_lo * pow2((int)int_exp - 39);
 
-  return flt_mant * flt_exp;
+  return expr_hi + expr_lo;
 }
 
 int
