@@ -99,7 +99,7 @@ from_1750eflt (short *input)	/* input : array of 3 shorts */
 
   int_exp = (signed char) (input[1] & 0xFF);
 
-  int_mant_hi = (((int) input[0] << 16) | ((int) input[1] & 0xFF00)) >> 8;
+  int_mant_hi = (((int) input[0] << 8) | ((int) input[1] & 0xFF00)) >> 8;
   int_mant_lo = ((int) input[2] & 0xFFFF);
 
   flt_mant = (double) int_mant_hi / FLOATING_TWO_TO_THE_TWENTYTHREE
