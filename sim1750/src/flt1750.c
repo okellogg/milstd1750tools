@@ -98,7 +98,7 @@ double
 from_1750eflt (short *input)	/* input : array of 3 shorts */
 {
   int int_mant_hi, int_mant_lo;
-  double flt_mant, flt_exp, expr_hi, expr_lo;
+  double expr_hi, expr_lo;
   signed char int_exp;
 
   int_exp = (signed char) (input[1] & 0xFF);
@@ -139,6 +139,12 @@ to_1750eflt (double input, short output[3])
   else if (exp > 127)
     return 1;			/* signalize overflow */
 
+  if (input < 0.0 && input >= -0.5)	/* prompted by UNIX frexp */
+    {
+      input *= 2.0;
+      exp--;
+    }
+
   output[0] = (short) (input * FLOATING_TWO_TO_THE_FIFTEEN);
   input -= (double) output[0] / FLOATING_TWO_TO_THE_FIFTEEN;
   hlp = (ushort) (input * FLOATING_TWO_TO_THE_TWENTYTHREE);
@@ -147,7 +153,7 @@ to_1750eflt (double input, short output[3])
   hlp = (ushort) (input * FLOATING_TWO_TO_THE_THIRTYNINE);
   output[2] = (short) hlp;
 
-  if (is_neg)			/* FIXME: need 2's complement here */
+  if (is_neg)
     {
       output[0] = ~output[0];
       output[1] = (~output[1] & 0xFF00) | (output[1] & 0x00FF);
