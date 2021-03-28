@@ -5,7 +5,7 @@
 /* Component :   flt1750.c -- host independent float conversion routines   */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-97              */
-/*                         (C) 2017 Oliver M. Kellogg                      */
+/*                      (C) 2017-2021 Oliver M. Kellogg                    */
 /* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
