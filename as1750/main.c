@@ -5,7 +5,7 @@
 /* Component :      main.c -- top-level routines and main program          */
 /*                                                                         */
 /* Copyright :         (C) Daimler-Benz Aerospace AG, 1994-1997            */
-/*                     (C) 1998-2012 Oliver M. Kellogg                     */
+/*                        (C) 1998-2021 Oliver M. Kellogg                  */
 /* Contact   :             okellogg@users.sourceforge.net                  */
 /*                                                                         */
 /* Disclaimer:                                                             */
@@ -729,6 +729,7 @@ static char *
 get_long (char *s, int *outnum)
 {
   bool is_neg = FALSE, intel = FALSE, c_lang = FALSE, tld = FALSE;
+  bool hash_hex = FALSE;
   char *start;
 
   *outnum = 0;
@@ -749,10 +750,11 @@ get_long (char *s, int *outnum)
 	intel = TRUE;
     }
   if (intel
+      || (hash_hex = (*s == '#' && isxdigit (*(s + 1))))
       || (c_lang = (*s == '0' && upcase (*(s + 1)) == 'X'))
       || (tld = strncmp (s, "16#", 3) == 0))
     {
-      s += c_lang ? 2 : tld ? 3 : 0;
+      s += hash_hex ? 1 : c_lang ? 2 : tld ? 3 : 0;
       start = s;
       while (isxdigit (*s))
 	{
@@ -761,7 +763,7 @@ get_long (char *s, int *outnum)
 	}
       if (s - start > 8)
 	{
-	  error ("get_num -- number at '%s' too large", start);
+	  error ("get_long -- number at '%s' too large", start);
 	  return NULL;
 	}
       if (intel)
@@ -770,7 +772,7 @@ get_long (char *s, int *outnum)
 	{
 	  if (*s != '#')
 	    {
-	      error ("get_num -- expecting '#' at end of number");
+	      error ("get_long -- expecting '#' at end of number");
 	      return NULL;
 	    }
 	  s++;
@@ -811,14 +813,14 @@ get_long (char *s, int *outnum)
 	}
       if (s - start > 32)
 	{
-	  error ("get_num -- number at '%s' too large", start);
+	  error ("get_long -- number at '%s' too large", start);
 	  return NULL;
 	}
       if (tld)
 	{
 	  if (*s != '#')
 	    {
-	      error ("get_num -- expecting '#' at end of number");
+	      error ("get_long -- expecting '#' at end of number");
 	      return NULL;
 	    }
 	  ++s;
@@ -834,7 +836,7 @@ get_long (char *s, int *outnum)
 	}
       if (s - start > 10)
 	{
-	  error ("get_num -- number at '%s' too large", start);
+	  error ("get_long -- number at '%s' too large", start);
 	  return NULL;
 	}
     }

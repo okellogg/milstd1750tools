@@ -5,10 +5,8 @@
 /* Component :          as1750.c -- 1750 instruction assembly              */
 /*                                                                         */
 /* Copyright :        (C) Daimler-Benz Aerospace AG, 1994-1997             */
-/*                                                                         */
-/* Author    :       Oliver M. Kellogg, Dornier Satellite Systems,         */
-/*                       Dept. RST13, D-81663 Munich, Germany.             */
-/* Contact   :             oliver.kellogg@space.otn.dasa.de                */
+/*                      (C) 2017-2021 Oliver M. Kellogg                    */
+/* Contact   :           okellogg@users.sourceforge.net                    */
 /*                                                                         */
 /* Disclaimer:                                                             */
 /*                                                                         */
@@ -56,6 +54,7 @@ char *
 get_num (char *s, int *outnum)
 {
   bool is_neg = FALSE, intel = FALSE, c_lang = FALSE, tld = FALSE;
+  bool hash_hex = FALSE;
   char *start;
 
   *outnum = 0;
@@ -76,10 +75,12 @@ get_num (char *s, int *outnum)
 	intel = TRUE;
     }
   if (intel
+      || (hash_hex = (*s == '#' && isxdigit (*(s + 1))))
       || (c_lang = (*s == '0' && upcase (*(s + 1)) == 'X'))
       || (tld = strncmp (s, "16#", 3) == 0))
     {
-      s += c_lang ? 2 : tld ? 3 : 0;
+      /* hexadecimal */
+      s += hash_hex ? 1 : c_lang ? 2 : tld ? 3 : 0;
       start = s;
       while (isxdigit (*s))
 	{
@@ -105,6 +106,7 @@ get_num (char *s, int *outnum)
     }
   else if (*s == '0' || (tld = (*s == '8' && *(s + 1) == '#')))
     {
+      /* octal */
       s += tld ? 2 : 1;
       start = s;
       while (*s >= '0' && *s <= '7')
@@ -129,6 +131,7 @@ get_num (char *s, int *outnum)
     }
   else if (*s == '@' || (tld = (*s == '2' && *(s + 1) == '#')))
     {
+      /* binary */
       s += (tld ? 2 : 1);
       start = s;
       while (*s == '0' || *s == '1')
@@ -153,6 +156,7 @@ get_num (char *s, int *outnum)
     }
   else if (isdigit (*s))
     {
+      /* decimal */
       start = s;
       while (isdigit (*s))
 	{
@@ -167,9 +171,11 @@ get_num (char *s, int *outnum)
     }
   else if (*s == '\'')
     {
+      /* character */
       start = s;
       if (*++s == '\\')
 	{
+          /* control character e.g. \t \n \r */
 	  switch (*++s)
 	    {
 	    case 't':
@@ -197,6 +203,7 @@ get_num (char *s, int *outnum)
     }
   else if (*s == '"')
     {
+      /* string */
       start = s;
       *outnum = ((int) *++s & 0xFF) << 8;
       *outnum |= (int) *++s & 0xFF;
