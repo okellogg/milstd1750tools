@@ -5,7 +5,7 @@
 	global loopbug
 	normal
 loopbug
-	org 0196
+	org #0196
       XIO     R0,RCFR
       ST      R0,#1ab3
       LIM     R13,#ffff
@@ -43,7 +43,7 @@ loopbug
       LIM     R0,#2f0
       LIM     R3,#014
 
-	org 02aa
+	org #02aa
       LIM     R2,0
       LR      R4,R0
       L       R3,0,R4
