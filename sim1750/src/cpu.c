@@ -182,7 +182,7 @@ workout_timing (int cycles)
 	      simreg.pir |= INTR_MACHERR;   /* machine error         */
 	      simreg.ft |= FT_SYSFAULT0;    /* sysfault 0 : watchdog */
 	      simreg.go = 0;
-	      info ("BARF! goes the watchdog\n");
+	      info ("BARK! goes the watchdog\n");
 	    }
 	}
     }
