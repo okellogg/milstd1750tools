@@ -864,6 +864,13 @@ realize_xio (ushort xio_address, ushort *transfer)
 	  *transfer = simreg.sw;
 	elsecase X_WSW:
 	  simreg.sw = *transfer;
+#ifdef NO_EXTENDED_MEMORY
+          if (simreg.sw & 0xF)
+            {
+              simreg.ft |= 0x10;  /* address state fault: bit 11 */
+              simreg.sw &= 0xFFF0;
+            }
+#endif
 	elsecase X_RPI:
 	  simreg.pir &= ~(0x8000 >> *transfer);
 	  if (*transfer == 1)
