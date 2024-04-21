@@ -12,7 +12,7 @@ CC=      gcc
 # CFLAGS= -D__STDC__=0 -DSTRNDUP -DSTRNCASECMP # -DGNU_READLINE
 
 # CFLAGS for Linux and hopefully other Unixes
-CFLAGS= -I./src -DSTRNDUP -DSTRNCASECMP -DHAVE_UTYPES # -DGNU_READLINE
+CFLAGS = -g -I./src -DSTRNDUP -DSTRNCASECMP -DHAVE_UTYPES # -DGNU_READLINE
 
 
 PROJ_DIR=.
@@ -58,10 +58,10 @@ profile: $(OBJECTS)
 	$(CC) -p -o $(PROJ_DIR)/sim $(OBJECTS)
 
 debug:
-	@$(MAKE) "CFLAGS= -g -Og -Wall $(CFLAGS)"
+	@$(MAKE) "CFLAGS= -O0 -Wall $(CFLAGS)"
 
 opt:
-	@$(MAKE) "CFLAGS= -O $(CFLAGS)"
+	@$(MAKE) "CFLAGS= -Og $(CFLAGS)"
 
 clean:
 	$(RM) $(OBJ)/*.o $(PROJ_DIR)/sim1750
