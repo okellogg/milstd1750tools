@@ -11,7 +11,7 @@ extern int    execute (void);
 /* extern struct regs simreg;
    (should be here but it's so ubiquitous that it is mentioned in arch.h) */
 extern struct mmureg pagereg[2][16][16];
-extern bool   executed_bpt;
+/* extern bool   executed_bpt; */
 extern uint   instcnt;
 extern int    bpindex;
 extern bool   disable_timers;
