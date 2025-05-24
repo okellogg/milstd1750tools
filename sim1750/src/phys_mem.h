@@ -11,10 +11,10 @@ extern bool   was_written (uint phys_address);
 extern void  *xalloc (uint number, uint size);
 extern uint allocated;  /* total amount allocated by xalloc() */
 
-/* mem.word[] contains the simulation's allocated memory pages.
+/* mem.word[] contains one allocated memory page of the simulation.
    The mem.was_written[] array has one bit for each address within a page.
    It is set to `1' on a write operation to the respective address.
-   Thus, read operations on uninitialized memory locations can be signalled.
+   Hence, read operations on uninitialized memory locations can be signalled.
  */
 
 typedef struct
