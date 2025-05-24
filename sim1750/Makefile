@@ -48,8 +48,8 @@ SOURCES= $(OBJECTS:$(OBJ)/%.o=$(SRC)/%.c)
 all: sim1750
 
 sim1750: $(OBJ) $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(PROJ_DIR)/sim1750 $(OBJECTS) -lm
-#	$(CC) $(CFLAGS) -o $(PROJ_DIR)/sim1750 $(OBJECTS) -lm -lreadline -ltermcap
+	# $(CC) $(CFLAGS) -o $(PROJ_DIR)/sim1750 $(OBJECTS) -lm -ltermcap
+	$(CC) $(CFLAGS) -o $(PROJ_DIR)/sim1750 $(OBJECTS) -lm -lreadline
 
 $(OBJ):
 	mkdir -p $@
