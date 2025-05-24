@@ -212,18 +212,13 @@ arith (operation_kind operation,
 
             laccu = lop0 * lop1;
 
-            if (lop0 != 0 && lop1 != 0)
+            if (laccu < -32768)
               {
-                if ((lop0 & 0x8000) == (lop1 & 0x8000))
-                  {
-                    if ((laccu & 0xFFFF8000) != 0)
-                      overflow = TRUE;
-                  }
-                else
-                  {
-                    if ((laccu & 0xFFFF8000) != 0xFFFF8000)
-                      overflow = TRUE;
-                  }
+                overflow = TRUE;
+              }
+            else if (laccu > 32767)
+              {
+                overflow = TRUE;
               }
 
             if (overflow)
@@ -244,7 +239,7 @@ arith (operation_kind operation,
                      | ((int) operand0[1] & 0xFFFF);
             int lop1 = (int) *operand1;
 
-            if (lop1 == 0 || (lop0 == 0x80000000 && lop1 == -1))
+            if (lop1 == 0)
               {
                 simreg.pir |= INTR_FIXOFL;
                 info ("FIXOFL on integer DIV, op0=%d op1=%d", lop0, lop1);
@@ -252,10 +247,29 @@ arith (operation_kind operation,
             else
               {
                 int laccu = lop0 / lop1;
-                int rem = lop0 % lop1;
-                operand0[0] = (short) laccu;
-                operand0[1] = (short) rem;
-                update_cs (operand0, VAR_INT);
+                bool overflow = FALSE;
+
+                if (laccu < -32768)
+                  {
+                    overflow = TRUE;
+                  }
+                else if (laccu > 32767)
+                  {
+                    overflow = TRUE;
+                  }
+
+                if (overflow)
+                  {
+                    simreg.pir |= INTR_FIXOFL;
+                    info ("FIXOFL on integer DIV, op0=%d op1=%d", lop0, lop1);
+                  }
+                else
+                  {
+                    int rem = lop0 % lop1;
+                    operand0[0] = (short) laccu;
+                    operand0[1] = (short) rem;
+                    update_cs (operand0, VAR_INT);
+                  }
               }
           }
 
@@ -265,7 +279,7 @@ arith (operation_kind operation,
             int lop0 = (int) *operand0;
             int lop1 = (int) *operand1;
 
-            if (lop1 == 0 || (lop0 == 0x80000000 && lop1 == -1))
+            if (lop1 == 0)
               {
                 simreg.pir |= INTR_FIXOFL;
                 info ("FIXOFL on integer DIVV, op0=%d op1=%d res=%d", lop0, lop1);
@@ -273,10 +287,29 @@ arith (operation_kind operation,
             else
               {
                 int laccu = lop0 / lop1;
-                int rem = lop0 % lop1;
-                operand0[0] = (short) laccu;
-                operand0[1] = (short) rem;
-                update_cs (operand0, VAR_INT);
+                bool overflow = FALSE;
+
+                if (laccu < -32768)
+                  {
+                    overflow = TRUE;
+                  }
+                else if (laccu > 32767)
+                  {
+                    overflow = TRUE;
+                  }
+
+                if (overflow)
+                  {
+                    simreg.pir |= INTR_FIXOFL;
+                    info ("FIXOFL on integer DIV, op0=%d op1=%d", lop0, lop1);
+                  }
+                else
+                  {
+                    int rem = lop0 % lop1;
+                    operand0[0] = (short) laccu;
+                    operand0[1] = (short) rem;
+                    update_cs (operand0, VAR_INT);
+                  }
               }
           }
         }
